@@ -1,0 +1,8 @@
+/**/node_modules/
+/**/project.lock.json
+/**/obj/
+/**/bin/
+/**/.vs/
+/**/.vscode/
+*.suo
+*.user
