@@ -163,7 +163,7 @@ public class ProductQuery {
 }
 ```
 
-## Warmup all execution plans
+## Warm-up all execution plans
 More thought needed to be put into this, but the idea is look at all parameter types,
 and execute the query with reasonable parameter value permutations. For a query to be
 considered for warmup, an `@WarmUp` directive should exist after `@:`/`@VarName:` directives.
@@ -179,3 +179,4 @@ Examples:
   return true;
 }
 ```
+#### TODO: Discuss how to add Dazor to project and startup.
