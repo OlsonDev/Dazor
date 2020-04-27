@@ -153,7 +153,7 @@ public class ProductQuery {
 | @foreach (var e in enumerator) {} | For each loop            |
 
 ## `appsettings.json` support (no `bool`s; use `enum`s for everything):
-```json
+```json5
 {
     "Dazor": {
         "AutoFromClause": "Off", // Off, On (default)
