@@ -162,3 +162,20 @@ public class ProductQuery {
     }
 }
 ```
+
+## Warmup all execution plans
+More thought needed to be put into this, but the idea is look at all parameter types,
+and execute the query with reasonable parameter value permutations. For a query to be
+considered for warmup, an `@WarmUp` directive should exist after `@:`/`@VarName:` directives.
+Examples:
+```cs
+@Common: MyProject.CommonNamespace.CommonQueryParameters
+@Product: ProductQueryParameters
+@WarmUp {
+  // We're not okay with parameter sniffing, don't even run this permutation.
+  if (Common.SomethingSqlServerParameterSniffs.Count == 1) return false;
+  // We're fine with parameter sniffing here, but just pick a better value.
+  Product.SomethingDazorPicksASillyWarmUpValueFor = "somethingbetter";
+  return true;
+}
+```
