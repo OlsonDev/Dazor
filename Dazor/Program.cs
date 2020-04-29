@@ -1,12 +1,9 @@
 ﻿using System;
 
-namespace Dazor
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
+namespace Dazor {
+  internal class Program {
+    internal static void Main(string[] args) {
+      Console.WriteLine("Hello World!");
     }
+  }
 }
