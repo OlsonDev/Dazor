@@ -57,10 +57,11 @@ END
 
 IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'Execution') BEGIN
   CREATE TABLE Dazor.Execution (
-      ExecutionID  BIGINT         NOT NULL IDENTITY
-    , DateTimeUtc  DATETIME2(7)   NOT NULL
-    , ResultID     TINYINT            NULL
-    , Args         NVARCHAR(MAX)  NOT NULL
+      ExecutionID        BIGINT         NOT NULL IDENTITY
+    , DateTimeUtc        DATETIME2(7)   NOT NULL
+    , Args               NVARCHAR(MAX)  NOT NULL
+    , ResultID           TINYINT            NULL
+    , ExecutionTimeInMs  INT                NULL
     , CONSTRAINT PK_Execution PRIMARY KEY ( ExecutionID )
     , CONSTRAINT FK_Execution_Result FOREIGN KEY (ResultID) REFERENCES Dazor.Result (ResultID)
   )
