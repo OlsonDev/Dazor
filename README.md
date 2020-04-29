@@ -3,6 +3,8 @@
 ## Example usage
 ```shell
 cd MyProject
+# Initialize a new Dazor project
+dazor init
 # Apply all Version scripts and then Repeatable scripts
 dazor migrate
 # Synonym:
@@ -29,6 +31,12 @@ dazor downgrade to 17
 dazor seed <name>
 # Clean data out of the database, insert records from seed file
 dazor apply <seed-name>
+# Remove all objects from of the database
+dazor clean-schema
+# Truncate/delete all data out of the database
+dazor clean-data
+# Fix a database seed for a specific version; useful if schema has changed since seeds were generated
+dazor fix-seeds
 # Get help information
 dazor help
 dazor help migrate
@@ -84,7 +92,7 @@ WHERE 1 = 1
 }
 
 @fragment Foo(ids) {
-    JOIN dbo.Foo AS F ON F.FooIDs #ids
+    JOIN dbo.Foo AS F ON F.FooIDs @= @#ids
 }
 ```
 
