@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Dazor.Cli {
   internal class ParseResult {
@@ -18,13 +19,15 @@ namespace Dazor.Cli {
     public ParseResult(params string[] errors) : this((IEnumerable<string>)errors) { }
 
     internal Result Run() {
-      if (Errors.Any()) {
+      if (!(Errors is null) && Errors.Any()) {
         foreach (var error in Errors) {
           Console.Error.WriteLine(error.Message);
         }
         return Result.ParseError;
       }
-      return Result.Success;
+      var type = Command.GetType();
+      var execute = type.GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance);
+      return (Result)execute.Invoke(Command, null);
     }
   }
 }
