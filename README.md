@@ -28,9 +28,9 @@ dazor undo 18+
 # Synonym:
 dazor downgrade to 17
 # Generate a data seed (SQL file containing insert statements)
-dazor seed <name>
+dazor new-seed <name>
 # Clean data out of the database, insert records from seed file
-dazor apply <seed-name>
+dazor apply-seed <seed-name>
 # Remove all objects from of the database
 dazor clean-schema
 # Truncate/delete all data out of the database
@@ -160,7 +160,7 @@ public class ProductQuery {
 | @{}                               | Arbitrary C# code block  |
 | @foreach (var e in enumerator) {} | For each loop            |
 
-## `appsettings.json` support (no `bool`s; use `enum`s for everything):
+## `dazor.json` support (no `bool`s; use `enum`s for everything):
 ```json5
 {
     "Dazor": {

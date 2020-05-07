@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Dazor.Cli;
 
 namespace Dazor {
   internal class Program {
-    internal static void Main(string[] args) {
-      Console.WriteLine("Hello World!");
-    }
+    internal static int Main(string[] args)
+      => (int)Parser.Parse(args).Run();
   }
 }
