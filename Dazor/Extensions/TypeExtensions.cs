@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Dazor.Extensions {
   internal static class TypeExtensions {
-		private static readonly IDictionary<Type, string> _typeToFriendlyName = new Dictionary<Type, string> {
+		private static readonly IDictionary<Type, string> TypeToFriendlyName = new Dictionary<Type, string> {
 				{ typeof(string), "string" },
 				{ typeof(object), "object" },
 				{ typeof(bool), "bool" },
@@ -22,7 +22,7 @@ namespace Dazor.Extensions {
 				{ typeof(void), "void" }
 		};
     public static string GetFriendlyName(this Type type) {
-      if (_typeToFriendlyName.TryGetValue(type, out var name)) return name;
+      if (TypeToFriendlyName.TryGetValue(type, out var name)) return name;
       if (type.IsArray) return type.GetElementType().GetFriendlyName() + "[]";
       if (!type.IsGenericType) return type.Name;
       name = type.Name;
