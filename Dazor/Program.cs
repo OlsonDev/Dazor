@@ -1,8 +1,9 @@
-﻿using Dazor.Cli;
+﻿using System.Threading.Tasks;
+using Dazor.Cli;
 
 namespace Dazor {
   internal class Program {
-    internal static int Main(string[] args)
-      => (int)Parser.Parse(args).Run();
+    internal static async Task<int> Main(string[] args)
+      => (int)await Parser.Parse(args).RunAsync();
   }
 }

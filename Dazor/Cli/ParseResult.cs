@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using Dazor.Extensions;
 
 namespace Dazor.Cli {
   internal class ParseResult {
@@ -18,16 +20,20 @@ namespace Dazor.Cli {
 
     public ParseResult(params string[] errors) : this((IEnumerable<string>)errors) { }
 
-    internal Result Run() {
+    internal Task<Result> RunAsync() {
       if (!(Errors is null) && Errors.Any()) {
         foreach (var error in Errors) {
           Console.Error.WriteLine(error.Message);
         }
-        return Result.ParseError;
+        return Task.FromResult(Result.ParseError);
       }
       var type = Command.GetType();
-      var execute = type.GetMethod("Execute", BindingFlags.NonPublic | BindingFlags.Instance);
-      return (Result)execute.Invoke(Command, null);
+      var executeAsync = type.GetMethod("ExecuteAsync", BindingFlags.NonPublic | BindingFlags.Instance);
+      if (executeAsync is null) {
+        Console.Error.WriteLine($"Command {Command.GetType().GetFriendlyName()} does not have an ExecuteAsync method.");
+        return Task.FromResult(Result.InternalError);
+      }
+      return (Task<Result>)executeAsync.Invoke(Command, null);
     }
   }
 }

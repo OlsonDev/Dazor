@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Dazor.Cli.Commands;
 using Dazor.Cli.Options;
@@ -43,6 +44,7 @@ namespace Dazor.Cli {
         "downgrade" => ParseDowngrade(),
         "fix-seeds" => ParseFixSeeds(),
         "generate" => ParseGenerate(),
+        "help" => ParseHelp(),
         "init" => ParseInit(),
         "migrate" => ParseMigrate(),
         "new-seed" => ParseNewSeed(),
@@ -54,24 +56,42 @@ namespace Dazor.Cli {
       };
 
     private ParseResult ParseApplySeed() => throw new NotImplementedException();
+
     private ParseResult ParseCleanData() => throw new NotImplementedException();
+
     private ParseResult ParseCleanSchema() => throw new NotImplementedException();
+
     private ParseResult ParseDowngrade() => throw new NotImplementedException();
+
     private ParseResult ParseFixSeeds() => throw new NotImplementedException();
+
     private ParseResult ParseGenerate() => throw new NotImplementedException();
+
+    private ParseResult ParseHelp() {
+      var command = new HelpCommand();
+      return new ParseResult { Command = command };
+    }
+
     private ParseResult ParseInit() {
+      // TODO: Use something like System.Data.Sql.SqlDataSourceEnumerator to get
+      //       network-local SQL Server data sources.
       var options = new InitOptions {
-        ConnectionString = GetArg<string>("Connection string?", "--connection-string")
+        ConnectionString = GetArg<string>("Connection string?", "--connection-string", "-cs")
       };
       var command = new InitCommand(options);
       return new ParseResult { Command = command };
     }
 
     private ParseResult ParseMigrate() => throw new NotImplementedException();
+
     private ParseResult ParseNewSeed() => throw new NotImplementedException();
+
     private ParseResult ParseRerun() => throw new NotImplementedException();
+
     private ParseResult ParseUndo() => throw new NotImplementedException();
+
     private ParseResult ParseUpgrade() => throw new NotImplementedException();
+
     private ParseResult ParseWatch() => throw new NotImplementedException();
 
     private ParseResult ParseNonexistent()
