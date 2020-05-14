@@ -1,10 +1,6 @@
-IF NOT EXISTS (SELECT * FROM sys.Schemas WHERE Name = 'Dazor') BEGIN
-  EXEC('CREATE SCHEMA Dazor;');
-END
+IF SCHEMA_ID('Dazor') IS NULL EXEC('CREATE SCHEMA Dazor;');
 
-DECLARE @DazorSchemaID INT = SCHEMA_ID('Dazor');
-
-IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'LogLevel') BEGIN
+IF OBJECT_ID('Dazor.LogLevel', 'U') IS NULL BEGIN
   CREATE TABLE Dazor.LogLevel (
       LogLevelID  TINYINT      NOT NULL IDENTITY(0, 1)
     , Name        VARCHAR(20)  NOT NULL
@@ -24,7 +20,7 @@ IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID 
     , ( 'None' );
 END
 
-IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'Result') BEGIN
+IF OBJECT_ID('Dazor.Result', 'U') IS NULL BEGIN
   CREATE TABLE Dazor.Result (
       ResultID  TINYINT      NOT NULL IDENTITY(0, 1)
     , Name      VARCHAR(50)  NOT NULL
@@ -39,7 +35,7 @@ IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID 
     , ( 'Failure' );
 END
 
-IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'MigrationType') BEGIN
+IF OBJECT_ID('Dazor.MigrationType', 'U') IS NULL BEGIN
   CREATE TABLE Dazor.MigrationType (
       MigrationTypeID  TINYINT      NOT NULL IDENTITY(0, 1)
     , Name             VARCHAR(50)  NOT NULL
@@ -55,7 +51,7 @@ IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID 
     , ( 'Repeatable' );
 END
 
-IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'Execution') BEGIN
+IF OBJECT_ID('Dazor.Execution', 'U') IS NULL BEGIN
   CREATE TABLE Dazor.Execution (
       ExecutionID        BIGINT         NOT NULL IDENTITY
     , DateTimeUtc        DATETIME2(7)   NOT NULL
@@ -67,7 +63,7 @@ IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID 
   )
 END
 
-IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'Log') BEGIN
+IF OBJECT_ID('Dazor.Log', 'U') IS NULL BEGIN
   CREATE TABLE Dazor.Log (
       LogID        BIGINT         NOT NULL IDENTITY
     , DateTimeUtc  DATETIME2(7)   NOT NULL
@@ -80,7 +76,7 @@ IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID 
   )
 END
 
-IF NOT EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'Migration') BEGIN
+IF OBJECT_ID('Dazor.Migration', 'U') IS NULL BEGIN
   CREATE TABLE Dazor.Migration (
       MigrationID        BIGINT         NOT NULL IDENTITY
     , DateTimeUtc        DATETIME2(7)   NOT NULL

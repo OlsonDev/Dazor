@@ -1,28 +1,9 @@
-DECLARE @DazorSchemaID INT = SCHEMA_ID('Dazor');
-
-IF EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'Migration') BEGIN
-  DROP TABLE Dazor.Migration;
-END
-
-IF EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'Log') BEGIN
-  DROP TABLE Dazor.Log;
-END
-
-IF EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'Execution') BEGIN
-  DROP TABLE Dazor.Execution;
-END
-
-IF EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'MigrationType') BEGIN
-  DROP TABLE Dazor.MigrationType;
-END
-
-IF EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'Result') BEGIN
-  DROP TABLE Dazor.Result;
-END
-
-IF EXISTS (SELECT * FROM sys.Tables AS T WHERE T.Schema_ID = @DazorSchemaID AND T.Name = 'LogLevel') BEGIN
-  DROP TABLE Dazor.LogLevel;
-END
+IF OBJECT_ID('Dazor.Migration'    , 'U') IS NOT NULL DROP TABLE Dazor.Migration;
+IF OBJECT_ID('Dazor.Log'          , 'U') IS NOT NULL DROP TABLE Dazor.Log;
+IF OBJECT_ID('Dazor.Execution'    , 'U') IS NOT NULL DROP TABLE Dazor.Execution;
+IF OBJECT_ID('Dazor.MigrationType', 'U') IS NOT NULL DROP TABLE Dazor.MigrationType;
+IF OBJECT_ID('Dazor.Result'       , 'U') IS NOT NULL DROP TABLE Dazor.Result;
+IF OBJECT_ID('Dazor.LogLevel'     , 'U') IS NOT NULL DROP TABLE Dazor.LogLevel;
 
 -- NOT NULL:
 IF TYPE_ID('Dazor.BitList')                    IS NOT NULL DROP TYPE Dazor.BitList;
