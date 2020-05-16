@@ -23,7 +23,8 @@ namespace Dazor.Extensions {
 		};
     public static string GetFriendlyName(this Type type) {
       if (TypeToFriendlyName.TryGetValue(type, out var name)) return name;
-      if (type.IsArray) return type.GetElementType().GetFriendlyName() + "[]";
+      // GetElementType() will not return null if it's an array or pointer type.
+      if (type.IsArray) return type.GetElementType()!.GetFriendlyName() + "[]";
       if (!type.IsGenericType) return type.Name;
       name = type.Name;
       var backtick = name.IndexOf('`');

@@ -7,13 +7,14 @@ using Dazor.Extensions;
 
 namespace Dazor.Cli {
   internal class ParseResult {
-    internal IList<ParseError> Errors { get; set; }
+    internal IList<ParseError>? Errors { get; set; }
 
-    internal object Command { get; set; }
+    internal object? Command { get; set; }
 
-    public ParseResult() { }
+    internal ParseResult(object command)
+      => Command = command;
 
-    public ParseResult(IEnumerable<string> errors)
+    internal ParseResult(IEnumerable<string> errors)
       => Errors = errors
         .Select(error => new ParseError(error))
         .ToList();
@@ -27,13 +28,19 @@ namespace Dazor.Cli {
         }
         return Task.FromResult(Result.ParseError);
       }
-      var type = Command.GetType();
+      // Based on our constructors, either Errors or Command must be non-null.
+      var type = Command!.GetType();
       var executeAsync = type.GetMethod("ExecuteAsync", BindingFlags.NonPublic | BindingFlags.Instance);
       if (executeAsync is null) {
         Console.Error.WriteLine($"Command {Command.GetType().GetFriendlyName()} does not have an ExecuteAsync method.");
         return Task.FromResult(Result.InternalError);
       }
-      return (Task<Result>)executeAsync.Invoke(Command, null);
+      var result = executeAsync.Invoke(Command, null);
+      if (result is null) {
+        Console.Error.WriteLine($"Command {Command.GetType().GetFriendlyName()}'s ExecuteAsync method returned null when a value was expected.");
+        return Task.FromResult(Result.InternalError);
+      }
+      return (Task<Result>)result;
     }
   }
 }

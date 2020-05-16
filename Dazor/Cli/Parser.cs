@@ -69,7 +69,7 @@ namespace Dazor.Cli {
 
     private ParseResult ParseHelp() {
       var command = new HelpCommand();
-      return new ParseResult { Command = command };
+      return new ParseResult(command);
     }
 
     private ParseResult ParseInit() {
@@ -79,7 +79,7 @@ namespace Dazor.Cli {
         ConnectionString = GetArg<string>("Connection string?", "--connection-string", "-cs")
       };
       var command = new InitCommand(options);
-      return new ParseResult { Command = command };
+      return new ParseResult(command);
     }
 
     private ParseResult ParseMigrate() => throw new NotImplementedException();
@@ -107,8 +107,7 @@ namespace Dazor.Cli {
         }
       }
       Console.Write(prompt.Trim() + " ");
-      var input = Console.ReadLine();
-      yield return input;
+      yield return Console.ReadLine() ?? ""; // If Ctrl+Z is pressed.
     }
 
     private T GetArg<T>(string prompt, params string[] opts) {
