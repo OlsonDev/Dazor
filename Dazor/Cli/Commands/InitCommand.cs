@@ -3,17 +3,16 @@ using System.Threading.Tasks;
 using Dazor.Cli.Options;
 using Microsoft.Data.SqlClient;
 using Dapper;
-using System.Linq;
 using System.IO;
 
 namespace Dazor.Cli.Commands {
-  internal class InitCommand {
+  internal class InitCommand : ICommand {
     private readonly InitOptions _options;
 
     internal InitCommand(InitOptions options)
       => _options = options;
 
-    internal async Task<Result> ExecuteAsync() {
+    public async Task<Result> ExecuteAsync() {
       Console.WriteLine($"Init command with options: ConnectionString = {_options.ConnectionString}");
       await InitDazorSchemaAsync();
       return Result.Success;

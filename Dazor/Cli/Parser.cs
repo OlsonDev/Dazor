@@ -35,7 +35,7 @@ namespace Dazor.Cli {
       _options[key] = values;
     }
 
-    internal ParseResult Parse()
+    internal IParseResult Parse()
       => Command switch
       {
         "apply-seed" => ParseApplySeed(),
@@ -55,47 +55,47 @@ namespace Dazor.Cli {
         _ => ParseNonexistent(),
       };
 
-    private ParseResult ParseApplySeed() => throw new NotImplementedException();
+    private IParseResult ParseApplySeed() => throw new NotImplementedException();
 
-    private ParseResult ParseCleanData() => throw new NotImplementedException();
+    private IParseResult ParseCleanData() => throw new NotImplementedException();
 
-    private ParseResult ParseCleanSchema() => throw new NotImplementedException();
+    private IParseResult ParseCleanSchema() => throw new NotImplementedException();
 
-    private ParseResult ParseDowngrade() => throw new NotImplementedException();
+    private IParseResult ParseDowngrade() => throw new NotImplementedException();
 
-    private ParseResult ParseFixSeeds() => throw new NotImplementedException();
+    private IParseResult ParseFixSeeds() => throw new NotImplementedException();
 
-    private ParseResult ParseGenerate() => throw new NotImplementedException();
+    private IParseResult ParseGenerate() => throw new NotImplementedException();
 
-    private ParseResult ParseHelp() {
+    private IParseResult ParseHelp() {
       var command = new HelpCommand();
-      return new ParseResult(command);
+      return new CommandResult(command);
     }
 
-    private ParseResult ParseInit() {
+    private IParseResult ParseInit() {
       // TODO: Use something like System.Data.Sql.SqlDataSourceEnumerator to get
       //       network-local SQL Server data sources.
       var options = new InitOptions {
         ConnectionString = GetArg<string>("Connection string?", "--connection-string", "-cs")
       };
       var command = new InitCommand(options);
-      return new ParseResult(command);
+      return new CommandResult(command);
     }
 
-    private ParseResult ParseMigrate() => throw new NotImplementedException();
+    private IParseResult ParseMigrate() => throw new NotImplementedException();
 
-    private ParseResult ParseNewSeed() => throw new NotImplementedException();
+    private IParseResult ParseNewSeed() => throw new NotImplementedException();
 
-    private ParseResult ParseRerun() => throw new NotImplementedException();
+    private IParseResult ParseRerun() => throw new NotImplementedException();
 
-    private ParseResult ParseUndo() => throw new NotImplementedException();
+    private IParseResult ParseUndo() => throw new NotImplementedException();
 
-    private ParseResult ParseUpgrade() => throw new NotImplementedException();
+    private IParseResult ParseUpgrade() => throw new NotImplementedException();
 
-    private ParseResult ParseWatch() => throw new NotImplementedException();
+    private IParseResult ParseWatch() => throw new NotImplementedException();
 
-    private ParseResult ParseNonexistent()
-      => new ParseResult($"dazor: '{Command}' is not a dazor command. See 'dazor help'.");
+    private IParseResult ParseNonexistent()
+      => new ErrorResult($"dazor: '{Command}' is not a dazor command. See 'dazor help'.");
 
     private IEnumerable<string> GetArg(string prompt, params string[] opts) {
       foreach (var opt in opts) {
@@ -117,6 +117,7 @@ namespace Dazor.Cli {
       throw new NotImplementedException($"{nameof(GetArg)}<{type.GetFriendlyName()}> not implemented.");
     }
 
-    internal static ParseResult Parse(string[] args) => new Parser(args).Parse();
+    internal static IParseResult Parse(string[] args)
+      => new Parser(args).Parse();
   }
 }
