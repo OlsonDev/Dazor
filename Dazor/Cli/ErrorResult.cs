@@ -16,9 +16,14 @@ namespace Dazor.Cli {
       : this((IEnumerable<string>)errors) { }
 
     public Task<Result> RunAsync() {
+      var previousColor = Console.ForegroundColor;
       foreach (var error in Errors) {
+        Console.ForegroundColor = ConsoleColor.DarkRed;
+        Console.Error.Write("Error: ");
+        Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Error.WriteLine(error.Message);
       }
+      Console.ForegroundColor = previousColor;
       return Task.FromResult(Result.ParseError);
     }
   }
