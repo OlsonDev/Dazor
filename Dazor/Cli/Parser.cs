@@ -35,25 +35,33 @@ namespace Dazor.Cli {
       _options[key] = values;
     }
 
-    internal IParseResult Parse()
-      => Command switch
-      {
-        "apply-seed" => ParseApplySeed(),
-        "clean-data" => ParseCleanData(),
-        "clean-schema" => ParseCleanSchema(),
-        "downgrade" => ParseDowngrade(),
-        "fix-seeds" => ParseFixSeeds(),
-        "generate" => ParseGenerate(),
-        "help" => ParseHelp(),
-        "init" => ParseInit(),
-        "migrate" => ParseMigrate(),
-        "new-seed" => ParseNewSeed(),
-        "rerun" => ParseRerun(),
-        "undo" => ParseUndo(),
-        "upgrade" => ParseUpgrade(),
-        "watch" => ParseWatch(),
-        _ => ParseNonexistent(),
-      };
+    internal static IParseResult Parse(string[] args)
+      => new Parser(args).Parse();
+
+    internal IParseResult Parse() {
+      try {
+        return Command switch
+        {
+          "apply-seed" => ParseApplySeed(),
+          "clean-data" => ParseCleanData(),
+          "clean-schema" => ParseCleanSchema(),
+          "downgrade" => ParseDowngrade(),
+          "fix-seeds" => ParseFixSeeds(),
+          "generate" => ParseGenerate(),
+          "help" => ParseHelp(),
+          "init" => ParseInit(),
+          "migrate" => ParseMigrate(),
+          "new-seed" => ParseNewSeed(),
+          "rerun" => ParseRerun(),
+          "undo" => ParseUndo(),
+          "upgrade" => ParseUpgrade(),
+          "watch" => ParseWatch(),
+          _ => ParseNonexistent(),
+        };
+      } catch (ParseException ex) {
+        return new ErrorResult(ex.Message);
+      }
+    }
 
     private IParseResult ParseApplySeed() => throw new NotImplementedException();
 
@@ -98,14 +106,24 @@ namespace Dazor.Cli {
       => new ErrorResult($"dazor: '{Command}' is not a dazor command. See 'dazor help'.");
 
     private IEnumerable<string> GetArg(string prompt, params string[] opts) {
+      var optsFound = new HashSet<string>();
       foreach (var opt in opts) {
         if (_options.TryGetValue(opt, out var values)) {
-          foreach (var value in values) {
-            yield return value;
+          if (optsFound.Count == 0) {
+            foreach (var value in values) {
+              yield return value;
+            }
           }
-          yield break;
+          optsFound.Add(opt);
         }
       }
+
+      if (optsFound.Count == 1) {
+        yield break;
+      } else if (optsFound.Count > 1) {
+        throw new ParseException($"The options {opts.ToFriendlyList()} are mutually exclusive.");
+      }
+
       Console.Write(prompt.Trim() + " ");
       yield return Console.ReadLine() ?? ""; // If Ctrl+Z is pressed.
     }
@@ -116,8 +134,5 @@ namespace Dazor.Cli {
       if (type == typeof(string)) return (T)(object)values.Cast<string>().Single();
       throw new NotImplementedException($"{nameof(GetArg)}<{type.GetFriendlyName()}> not implemented.");
     }
-
-    internal static IParseResult Parse(string[] args)
-      => new Parser(args).Parse();
   }
 }
