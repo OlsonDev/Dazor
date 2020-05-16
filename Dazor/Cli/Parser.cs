@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using Dazor.Cli.Commands;
 using Dazor.Cli.Options;
 using Dazor.Extensions;
+using Microsoft.Data.SqlClient;
 
 namespace Dazor.Cli {
   internal class Parser {
@@ -84,7 +84,7 @@ namespace Dazor.Cli {
       // TODO: Use something like System.Data.Sql.SqlDataSourceEnumerator to get
       //       network-local SQL Server data sources.
       var options = new InitOptions {
-        ConnectionString = GetArg<string>("Connection string?", "--connection-string", "-cs")
+        ConnectionString = GetConnectionString()
       };
       var command = new InitCommand(options);
       return new CommandResult(command);
@@ -105,34 +105,125 @@ namespace Dazor.Cli {
     private IParseResult ParseNonexistent()
       => new ErrorResult($"dazor: '{Command}' is not a dazor command. See 'dazor help'.");
 
-    private IEnumerable<string> GetArg(string prompt, params string[] opts) {
+    private bool HasArg(string[] opts) {
+      var optsFound = new HashSet<string>();
+      foreach (var opt in opts) {
+        if (_options.ContainsKey(opt)) optsFound.Add(opt);
+      }
+
+      if (optsFound.Count > 1) {
+        throw new ParseException($"The options {opts.ToFriendlyList()} are mutually exclusive.");
+      }
+
+      return optsFound.Count == 1;
+    }
+
+    private bool TryGetArg(out IEnumerable<string>? arg, string[] opts) {
+      arg = null;
+
       var optsFound = new HashSet<string>();
       foreach (var opt in opts) {
         if (_options.TryGetValue(opt, out var values)) {
           if (optsFound.Count == 0) {
-            foreach (var value in values) {
-              yield return value;
-            }
+            arg = values;
           }
           optsFound.Add(opt);
         }
       }
 
-      if (optsFound.Count == 1) {
-        yield break;
-      } else if (optsFound.Count > 1) {
+      if (optsFound.Count > 1) {
+        // TODO: If mutually exclusive options are passed, make the user pick one or re-type.
         throw new ParseException($"The options {opts.ToFriendlyList()} are mutually exclusive.");
       }
 
-      Console.Write(prompt.Trim() + " ");
-      yield return Console.ReadLine() ?? ""; // If Ctrl+Z is pressed.
+      return optsFound.Count == 1;
     }
 
-    private T GetArg<T>(string prompt, params string[] opts) {
-      var values = GetArg(prompt, opts);
+    private T GetArgAndPrompt<T>(string prompt, string[] opts) {
+      try {
+        if (TryGetArg(out var argValues, opts)) {
+          return ConvertArg<T>(argValues!);
+        }
+      } catch (Exception ex) {
+        Console.Error.WriteErrorLine(ex.Message);
+      }
+      return Prompt<T>(prompt);
+    }
+
+    private T Prompt<T>(string prompt) {
+      prompt = AdjustPromptByType<T>(prompt);
+      while (true) {
+        try {
+          return ConvertArg<T>(Prompt(prompt));
+        } catch (Exception ex) {
+          Console.Error.WriteErrorLine(ex.Message);
+        }
+      }
+    }
+
+    private IEnumerable<string> Prompt(string prompt) {
+      var previousColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Cyan;
+      Console.Write(prompt.Trim() + " ");
+      Console.ForegroundColor = ConsoleColor.White;
+      var value = Console.ReadLine() ?? ""; // If Ctrl+Z is pressed.
+      Console.ForegroundColor = previousColor;
+      yield return value;
+    }
+
+    private string AdjustPromptByType<T>(string prompt) {
       var type = typeof(T);
-      if (type == typeof(string)) return (T)(object)values.Cast<string>().Single();
-      throw new NotImplementedException($"{nameof(GetArg)}<{type.GetFriendlyName()}> not implemented.");
+      if (type == typeof(bool)) return prompt + " (Y/N)";
+      return prompt;
+    }
+
+    private T ConvertArg<T>(IEnumerable<string> argValues) {
+      var type = typeof(T);
+      if (type == typeof(string)) return (T)(object)string.Join(" ", argValues);
+      if (type == typeof(bool)) return (T)(object)ConvertToBool(argValues);
+      throw new NotImplementedException($"{nameof(ConvertArg)}<{type.GetFriendlyName()}> not implemented.");
+    }
+
+    private bool ConvertToBool(IEnumerable<string> values)
+      => values.Single().ToLowerInvariant() switch {
+        "y" => true,
+        "yes" => true,
+        "1" => true,
+        "true" => true,
+        "n" => false,
+        "no" => false,
+        "0" => false,
+        "false" => false,
+        _ => throw new ParseException($"Please enter y/yes/1/true/n/no/0/false."),
+      };
+
+    private string GetConnectionString() {
+      if (TryGetArg(out var connectionString, Opts.ConnectionString)) {
+        return string.Join(" ", connectionString!);
+      }
+
+      var builder = new SqlConnectionStringBuilder {
+        DataSource = GetArgAndPrompt<string>("DataSource?", Opts.DataSource),
+        InitialCatalog = GetArgAndPrompt<string>("Initial catalog?", Opts.Database),
+      };
+
+      var hasIntegratedSecurity = HasArg(Opts.IntegratedSecurity);
+      var hasUserId = HasArg(Opts.User);
+      var hasPassword = HasArg(Opts.Password);
+
+      if (hasIntegratedSecurity && (hasUserId || hasPassword)) {
+        // TODO: Handle this better.
+        throw new ParseException($"The options {string.Join("/", Opts.IntegratedSecurity)} are mutually exclusive with {string.Join("/", Opts.User)} and {string.Join("/", Opts.Password)}.");
+      }
+
+      if (!hasUserId && !hasPassword && (hasIntegratedSecurity || Prompt<bool>("Integrated security?"))) {
+        builder.IntegratedSecurity = true;
+      } else {
+        builder.UserID = GetArgAndPrompt<string>("User ID?", Opts.User);
+        builder.Password = GetArgAndPrompt<string>("Password?", Opts.Password);
+      }
+
+      return builder.ToString();
     }
   }
 }

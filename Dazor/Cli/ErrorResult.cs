@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dazor.Extensions;
 
 namespace Dazor.Cli {
   internal class ErrorResult : IParseResult {
@@ -16,14 +17,9 @@ namespace Dazor.Cli {
       : this((IEnumerable<string>)errors) { }
 
     public Task<Result> RunAsync() {
-      var previousColor = Console.ForegroundColor;
       foreach (var error in Errors) {
-        Console.ForegroundColor = ConsoleColor.DarkRed;
-        Console.Error.Write("Error: ");
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Error.WriteLine(error.Message);
+        Console.Error.WriteErrorLine(error.Message);
       }
-      Console.ForegroundColor = previousColor;
       return Task.FromResult(Result.ParseError);
     }
   }
