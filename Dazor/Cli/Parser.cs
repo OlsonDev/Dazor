@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dazor.Cli.Commands;
 using Dazor.Cli.Options;
+using Dazor.Cli.Interaction;
 using Dazor.Extensions;
 using Microsoft.Data.SqlClient;
 
@@ -142,60 +143,13 @@ namespace Dazor.Cli {
     private T GetArgAndPrompt<T>(string prompt, string[] opts) {
       try {
         if (TryGetArg(out var argValues, opts)) {
-          return ConvertArg<T>(argValues!);
+          return Convert.To<T>(argValues!);
         }
       } catch (Exception ex) {
         Console.Error.WriteErrorLine(ex.Message);
       }
-      return Prompt<T>(prompt);
+      return Prompt.With<T>(prompt);
     }
-
-    private T Prompt<T>(string prompt) {
-      prompt = AdjustPromptByType<T>(prompt);
-      while (true) {
-        try {
-          return ConvertArg<T>(Prompt(prompt));
-        } catch (Exception ex) {
-          Console.Error.WriteErrorLine(ex.Message);
-        }
-      }
-    }
-
-    private IEnumerable<string> Prompt(string prompt) {
-      var previousColor = Console.ForegroundColor;
-      Console.ForegroundColor = ConsoleColor.Cyan;
-      Console.Write(prompt.Trim() + " ");
-      Console.ForegroundColor = ConsoleColor.White;
-      var value = Console.ReadLine() ?? ""; // If Ctrl+Z is pressed.
-      Console.ForegroundColor = previousColor;
-      yield return value;
-    }
-
-    private string AdjustPromptByType<T>(string prompt) {
-      var type = typeof(T);
-      if (type == typeof(bool)) return prompt + " (Y/N)";
-      return prompt;
-    }
-
-    private T ConvertArg<T>(IEnumerable<string> argValues) {
-      var type = typeof(T);
-      if (type == typeof(string)) return (T)(object)string.Join(" ", argValues);
-      if (type == typeof(bool)) return (T)(object)ConvertToBool(argValues);
-      throw new NotImplementedException($"{nameof(ConvertArg)}<{type.GetFriendlyName()}> not implemented.");
-    }
-
-    private bool ConvertToBool(IEnumerable<string> values)
-      => values.Single().ToLowerInvariant() switch {
-        "y" => true,
-        "yes" => true,
-        "1" => true,
-        "true" => true,
-        "n" => false,
-        "no" => false,
-        "0" => false,
-        "false" => false,
-        _ => throw new ParseException($"Please enter y/yes/1/true/n/no/0/false."),
-      };
 
     private string GetConnectionString() {
       if (TryGetArg(out var connectionString, Opts.ConnectionString)) {
@@ -216,7 +170,7 @@ namespace Dazor.Cli {
         throw new ParseException($"The options {string.Join("/", Opts.IntegratedSecurity)} are mutually exclusive with {string.Join("/", Opts.User)} and {string.Join("/", Opts.Password)}.");
       }
 
-      if (!hasUserId && !hasPassword && (hasIntegratedSecurity || Prompt<bool>("Integrated security?"))) {
+      if (!hasUserId && !hasPassword && (hasIntegratedSecurity || Prompt.With<bool>("Integrated security?"))) {
         builder.IntegratedSecurity = true;
       } else {
         builder.UserID = GetArgAndPrompt<string>("User ID?", Opts.User);
