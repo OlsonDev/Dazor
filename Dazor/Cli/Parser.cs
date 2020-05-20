@@ -119,6 +119,17 @@ namespace Dazor.Cli {
       return optsFound.Count == 1;
     }
 
+    private IEnumerable<string>? TryGetFirstArg(string[] opts) {
+      var orderedOpts = opts
+        .OrderBy(opt => !opt.StartsWith("--")) // Verbose syntax first
+        .ThenBy(opt => opt);
+      foreach (var opt in orderedOpts) {
+        if (_options.TryGetValue(opt, out var values))
+          return values;
+      }
+      return null;
+    }
+
     private bool TryGetArg(out IEnumerable<string>? arg, string[] opts) {
       arg = null;
 
@@ -151,13 +162,21 @@ namespace Dazor.Cli {
       return Prompt.With<T>(prompt);
     }
 
+    private T PromptWithSuggestion<T>(string prompt, string[] opts) {
+      var firstArg = TryGetFirstArg(opts);
+      var suggestion = firstArg is null
+        ? ""
+        : string.Join(' ', firstArg);
+      return Prompt.WithSuggestion<T>(prompt, suggestion);
+    }
+
     private string GetConnectionString() {
       if (TryGetArg(out var connectionString, Opts.ConnectionString)) {
         return string.Join(" ", connectionString!);
       }
 
       var builder = new SqlConnectionStringBuilder {
-        DataSource = GetArgAndPrompt<string>("DataSource?", Opts.DataSource),
+        DataSource = GetArgAndPrompt<string>("Data source?", Opts.DataSource),
         InitialCatalog = GetArgAndPrompt<string>("Initial catalog?", Opts.Database),
       };
 
@@ -165,13 +184,19 @@ namespace Dazor.Cli {
       var hasUserId = HasArg(Opts.User);
       var hasPassword = HasArg(Opts.Password);
 
-      if (hasIntegratedSecurity && (hasUserId || hasPassword)) {
-        // TODO: Handle this better.
-        throw new ParseException($"The options {string.Join("/", Opts.IntegratedSecurity)} are mutually exclusive with {string.Join("/", Opts.User)} and {string.Join("/", Opts.Password)}.");
+      var ambiguousAuth = hasIntegratedSecurity && (hasUserId || hasPassword);
+      if (ambiguousAuth) {
+        Console.Error.WriteErrorLine($"The options {string.Join("/", Opts.IntegratedSecurity)} are mutually exclusive with {string.Join("/", Opts.User)} and {string.Join("/", Opts.Password)}.");
+        hasIntegratedSecurity = false;
+        hasUserId = false;
+        hasPassword = false;
       }
 
       if (!hasUserId && !hasPassword && (hasIntegratedSecurity || Prompt.With<bool>("Integrated security?"))) {
         builder.IntegratedSecurity = true;
+      } else if (ambiguousAuth) {
+        builder.UserID = PromptWithSuggestion<string>("User ID?", Opts.User);
+        builder.Password = PromptWithSuggestion<string>("Password?", Opts.Password);
       } else {
         builder.UserID = GetArgAndPrompt<string>("User ID?", Opts.User);
         builder.Password = GetArgAndPrompt<string>("Password?", Opts.Password);

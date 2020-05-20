@@ -5,15 +5,22 @@ using Dazor.Extensions;
 
 namespace Dazor.Cli {
   internal static class Convert {
+    internal static T To<T>(string value) {
+      var type = typeof(T);
+      if (type == typeof(string)) return (T)(object)value;
+      if (type == typeof(bool)) return (T)(object)ConvertToBool(value);
+      throw new NotImplementedException($"{nameof(Convert)}.{nameof(To)}<{type.GetFriendlyName()}>(value) not implemented.");
+    }
+
     internal static T To<T>(IEnumerable<string> values) {
       var type = typeof(T);
       if (type == typeof(string)) return (T)(object)string.Join(" ", values);
-      if (type == typeof(bool)) return (T)(object)ConvertToBool(values);
-      throw new NotImplementedException($"{nameof(Convert)}.{nameof(To)}<{type.GetFriendlyName()}>() not implemented.");
+      if (type == typeof(bool)) return (T)(object)ConvertToBool(values.Single());
+      throw new NotImplementedException($"{nameof(Convert)}.{nameof(To)}<{type.GetFriendlyName()}>(values) not implemented.");
     }
 
-    internal static bool ConvertToBool(IEnumerable<string> values)
-      => values.Single().ToLowerInvariant() switch {
+    internal static bool ConvertToBool(string value)
+      => value.ToLowerInvariant() switch {
         "y" => true,
         "yes" => true,
         "1" => true,
