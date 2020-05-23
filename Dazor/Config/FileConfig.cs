@@ -4,6 +4,7 @@ namespace Dazor.Config {
   /// <summary>Represents a dazor.json configuration file.</summary>
   public class FileConfig {
     public string? ConnectionString { get; set; }
+    public string? RootDirectory { get; set; }
     public AutoFromClauseMode? AutoFromClause { get; set; }
     public AutoJoinClauseMode? AutoJoinClause { get; set; }
     public string? AutoParameterNameSuffix { get; set; }
@@ -13,6 +14,7 @@ namespace Dazor.Config {
     public BoundConfig BindDefaults()
       => new BoundConfig(
         ConnectionString ?? throw new InvalidOperationException("ConnectionString cannot be null."),
+        RootDirectory ?? "./SQL",
         AutoFromClause ?? AutoFromClauseMode.On,
         AutoJoinClause ?? AutoJoinClauseMode.ForeignKey,
         AutoParameterNameSuffix ?? "QueryParameters",

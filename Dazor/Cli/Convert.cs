@@ -11,7 +11,7 @@ namespace Dazor.Cli {
       if (type == typeof(string)) return (T)(object)value;
       if (type == typeof(bool)) return (T)(object)ConvertToBool(value);
       if (type == typeof(AutoFromClauseMode)) return (T)(object)ConvertToAutoFromClauseMode(value);
-      if (type == typeof(AutoJoinClauseMode)) return (T)(object)ConvertToAutoJoinMode(value);
+      if (type == typeof(AutoJoinClauseMode)) return (T)(object)ConvertToAutoJoinClauseMode(value);
       if (type == typeof(GitHookMode)) return (T)(object)ConvertToGitHookMode(value);
       throw new NotImplementedException($"{nameof(Convert)}.{nameof(To)}<{type.GetFriendlyName()}>(value) not implemented.");
     }
@@ -21,7 +21,7 @@ namespace Dazor.Cli {
       if (type == typeof(string)) return (T)(object)string.Join(" ", values);
       if (type == typeof(bool)) return (T)(object)ConvertToBool(values.Single());
       if (type == typeof(AutoFromClauseMode)) return (T)(object)ConvertToAutoFromClauseMode(values.Single());
-      if (type == typeof(AutoJoinClauseMode)) return (T)(object)ConvertToAutoJoinMode(values.Single());
+      if (type == typeof(AutoJoinClauseMode)) return (T)(object)ConvertToAutoJoinClauseMode(values.Single());
       if (type == typeof(GitHookMode)) return (T)(object)ConvertToGitHookMode(values.Single());
       throw new NotImplementedException($"{nameof(Convert)}.{nameof(To)}<{type.GetFriendlyName()}>(values) not implemented.");
     }
@@ -46,7 +46,7 @@ namespace Dazor.Cli {
         _ => throw new ParseException($"Please enter on/off."),
       };
 
-    internal static AutoJoinClauseMode ConvertToAutoJoinMode(string value)
+    internal static AutoJoinClauseMode ConvertToAutoJoinClauseMode(string value)
       => value.ToLowerInvariant() switch {
         "off" => AutoJoinClauseMode.Off,
         "fk" => AutoJoinClauseMode.ForeignKey,

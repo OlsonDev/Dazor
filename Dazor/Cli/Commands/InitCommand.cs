@@ -23,6 +23,7 @@ namespace Dazor.Cli.Commands {
     private Task WriteDazorJsonAsync() {
       var fileConfig = new FileConfig {
         ConnectionString = _options.ConnectionString,
+        RootDirectory = _options.RootDirectory,
         AutoFromClause = _options.AutoFromClause,
         AutoJoinClause = _options.AutoJoinClause,
         AutoParameterNameSuffix = _options.AutoParameterNameSuffix,

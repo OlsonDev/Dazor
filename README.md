@@ -163,13 +163,11 @@ public class ProductQuery {
 ## `dazor.json` support (no `bool`s; use `enum`s for everything):
 ```json5
 {
-    "Dazor": {
-        "AutoFromClause": "Off", // Off, On (default)
-        "AutoJoinClause": "Off", // Off, ForeignKey (default), Convention
-        "AutoParameterNameSuffix": "QueryParameters", // (default); allows for @: MyProject.CommonNamespace.CommonQueryParameters to be automatically named Common
-        "GitHook": "On", // If enabled, switching branches backs up DB to {old-branch}.sql and then cleans the schema, fully upgrades, then restores {new-branch}.sql if it exists, else uses {default-seed}.sql.
-        "DefaultSeed": "", // The name of the default seed to use when switching branches, among other operations.
-    }
+    "AutoFromClause": "Off", // Off, On (default)
+    "AutoJoinClause": "Off", // Off, ForeignKey (default), Convention
+    "AutoParameterNameSuffix": "QueryParameters", // (default); allows for @: MyProject.CommonNamespace.CommonQueryParameters to be automatically named Common
+    "GitHook": "On", // If enabled, switching branches backs up DB to {old-branch}.sql and then cleans the schema, fully upgrades, then restores {new-branch}.sql if it exists, else uses {default-seed}.sql.
+    "DefaultSeed": "default", // The name of the default seed to use when switching branches, among other operations.
 }
 ```
 

@@ -8,19 +8,22 @@ namespace Dazor.Config {
   public class BoundConfig {
     internal BoundConfig(
       string connectionString,
+      string rootDirectory,
       AutoFromClauseMode autoFromClauseMode,
-      AutoJoinClauseMode autoJoinMode,
+      AutoJoinClauseMode autoJoinClauseMode,
       string autoParameterNameSuffix,
       GitHookMode gitHookMode,
       string defaultSeed) {
       ConnectionString = connectionString;
+      RootDirectory = rootDirectory;
       AutoFromClauseMode = autoFromClauseMode;
-      AutoJoinClauseMode = autoJoinMode;
+      AutoJoinClauseMode = autoJoinClauseMode;
       AutoParameterNameSuffix = autoParameterNameSuffix;
       GitHookMode = gitHookMode;
       DefaultSeed = defaultSeed;
     }
     public string ConnectionString { get; set; }
+    public string RootDirectory { get; set; }
     public AutoFromClauseMode AutoFromClauseMode { get; set; }
     public AutoJoinClauseMode AutoJoinClauseMode { get; set; }
     public string AutoParameterNameSuffix { get; set; }

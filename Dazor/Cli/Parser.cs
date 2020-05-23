@@ -7,6 +7,7 @@ using Dazor.Cli.Interaction;
 using Dazor.Extensions;
 using Microsoft.Data.SqlClient;
 using Dazor.Config;
+using Dazor.Cli.Opts;
 
 namespace Dazor.Cli {
   internal class Parser {
@@ -87,6 +88,7 @@ namespace Dazor.Cli {
       //       network-local SQL Server data sources.
       var options = new InitOptions(
         GetConnectionString(),
+        GetRootDirectory(),
         GetAutoFromClause(),
         GetAutoJoinClause(),
         GetAutoParameterNameSuffix(),
@@ -176,22 +178,22 @@ namespace Dazor.Cli {
     }
 
     private string GetConnectionString() {
-      if (TryGetArg(out var connectionString, Opts.ConnectionString)) {
+      if (TryGetArg(out var connectionString, InitOpts.ConnectionString)) {
         return string.Join(" ", connectionString!);
       }
 
       var builder = new SqlConnectionStringBuilder {
-        DataSource = GetArgAndPrompt<string>("Data source (database server address)?", Opts.DataSource),
-        InitialCatalog = GetArgAndPrompt<string>("Initial catalog (database name)?", Opts.Database),
+        DataSource = GetArgAndPrompt<string>("Data source (database server address)?", InitOpts.DataSource),
+        InitialCatalog = GetArgAndPrompt<string>("Initial catalog (database name)?", InitOpts.Database),
       };
 
-      var hasIntegratedSecurity = HasArg(Opts.IntegratedSecurity);
-      var hasUserId = HasArg(Opts.User);
-      var hasPassword = HasArg(Opts.Password);
+      var hasIntegratedSecurity = HasArg(InitOpts.IntegratedSecurity);
+      var hasUserId = HasArg(InitOpts.User);
+      var hasPassword = HasArg(InitOpts.Password);
 
       var ambiguousAuth = hasIntegratedSecurity && (hasUserId || hasPassword);
       if (ambiguousAuth) {
-        Console.Error.WriteErrorLine($"The options {string.Join("/", Opts.IntegratedSecurity)} are mutually exclusive with {string.Join("/", Opts.User)} and {string.Join("/", Opts.Password)}.");
+        Console.Error.WriteErrorLine($"The options {string.Join("/", InitOpts.IntegratedSecurity)} are mutually exclusive with {string.Join("/", InitOpts.User)} and {string.Join("/", InitOpts.Password)}.");
         hasIntegratedSecurity = false;
         hasUserId = false;
         hasPassword = false;
@@ -200,34 +202,38 @@ namespace Dazor.Cli {
       if (!hasUserId && !hasPassword && (hasIntegratedSecurity || Prompt.With<bool>("Integrated security?"))) {
         builder.IntegratedSecurity = true;
       } else if (ambiguousAuth) {
-        builder.UserID = PromptWithSuggestion<string>("User ID?", Opts.User);
-        builder.Password = PromptWithSuggestion<string>("Password?", Opts.Password);
+        builder.UserID = PromptWithSuggestion<string>("User ID?", InitOpts.User);
+        builder.Password = PromptWithSuggestion<string>("Password?", InitOpts.Password);
       } else {
-        builder.UserID = GetArgAndPrompt<string>("User ID?", Opts.User);
-        builder.Password = GetArgAndPrompt<string>("Password?", Opts.Password);
+        builder.UserID = GetArgAndPrompt<string>("User ID?", InitOpts.User);
+        builder.Password = GetArgAndPrompt<string>("Password?", InitOpts.Password);
       }
 
       return builder.ToString();
     }
 
+    // TODO: Suggest "./SQL" if not specified.
+    private string GetRootDirectory()
+      => GetArgAndPrompt<string>("Relative to here, where do you want your migrations and seeds stored?", InitOpts.RootDirectory);
+
     // TODO: Suggest "On" if not specified.
     private AutoFromClauseMode GetAutoFromClause()
-      => GetArgAndPrompt<AutoFromClauseMode>("Do you want automatic FROM clause insertion?", Opts.AutoFromClause);
+      => GetArgAndPrompt<AutoFromClauseMode>("Do you want automatic FROM clause insertion?", InitOpts.AutoFromClause);
 
     // TODO: Suggest "ForeignKey" if not specified.
     private AutoJoinClauseMode GetAutoJoinClause()
-      => GetArgAndPrompt<AutoJoinClauseMode>("How do you want incomplete JOINs to be handled?", Opts.AutoJoinClause);
+      => GetArgAndPrompt<AutoJoinClauseMode>("How do you want incomplete JOINs to be handled?", InitOpts.AutoJoinClause);
 
     // TODO: Suggest "QueryParameters" if not specified.
     private string GetAutoParameterNameSuffix()
-      => GetArgAndPrompt<string>("What suffix do you want automatically stripped off your query parameters?", Opts.AutoParameterNameSuffix);
+      => GetArgAndPrompt<string>("What suffix do you want automatically stripped off your query parameters?", InitOpts.AutoParameterNameSuffix);
 
     // TODO: Suggest "On" if not specified.
     private GitHookMode GetGitHook()
-      => GetArgAndPrompt<GitHookMode>("Do you want a helpful git-hook installed?", Opts.GitHook);
+      => GetArgAndPrompt<GitHookMode>("Do you want a helpful git-hook installed?", InitOpts.GitHook);
 
     // TODO: Suggest "default" if not specified.
     private string GetDefaultSeed()
-      => GetArgAndPrompt<string>("What do you want the name of your default seed to be?", Opts.DefaultSeed);
+      => GetArgAndPrompt<string>("What do you want the name of your default seed to be?", InitOpts.DefaultSeed);
   }
 }
