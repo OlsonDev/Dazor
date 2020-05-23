@@ -5,14 +5,18 @@ namespace Dazor.Config {
   public class FileConfig {
     public string? ConnectionString { get; set; }
     public AutoFromClauseMode? AutoFromClause { get; set; }
-    public AutoJoinMode? AutoJoins { get; set; }
+    public AutoJoinClauseMode? AutoJoinClause { get; set; }
     public string? AutoParameterNameSuffix { get; set; }
+    public GitHookMode? GitHook { get; set; }
+    public string? DefaultSeed { get; set; }
 
     public BoundConfig BindDefaults()
       => new BoundConfig(
         ConnectionString ?? throw new InvalidOperationException("ConnectionString cannot be null."),
         AutoFromClause ?? AutoFromClauseMode.On,
-        AutoJoins ?? AutoJoinMode.ForeignKey,
-        AutoParameterNameSuffix ?? "QueryParameters");
+        AutoJoinClause ?? AutoJoinClauseMode.ForeignKey,
+        AutoParameterNameSuffix ?? "QueryParameters",
+        GitHook ?? GitHookMode.On,
+        DefaultSeed ?? "default");
   }
 }

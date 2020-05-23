@@ -5,8 +5,7 @@ using Microsoft.Data.SqlClient;
 using Dapper;
 using System.IO;
 using System.Diagnostics;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Dazor.Config;
 
 namespace Dazor.Cli.Commands {
   internal class InitCommand : ICommand {
@@ -16,9 +15,24 @@ namespace Dazor.Cli.Commands {
       => _options = options;
 
     public async Task<Result> ExecuteAsync() {
-      Console.WriteLine($"Init command with options: ConnectionString = {_options.ConnectionString}");
+      await WriteDazorJsonAsync();
       await InitDazorSchemaAsync();
       return Result.Success;
+    }
+
+    private Task WriteDazorJsonAsync() {
+      var fileConfig = new FileConfig {
+        ConnectionString = _options.ConnectionString,
+        AutoFromClause = _options.AutoFromClause,
+        AutoJoinClause = _options.AutoJoinClause,
+        AutoParameterNameSuffix = _options.AutoParameterNameSuffix,
+        GitHook = _options.GitHook,
+        DefaultSeed = _options.DefaultSeed,
+      };
+
+      // TODO: Not really necessary the way the Parser insists on completing all fields at the moment.
+      var boundConfig = fileConfig.BindDefaults();
+      return boundConfig.WriteAsync();
     }
 
     private async Task InitDazorSchemaAsync() {

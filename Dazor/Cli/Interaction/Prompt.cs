@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dazor.Config;
 using Dazor.Extensions;
 
 namespace Dazor.Cli.Interaction {
@@ -29,7 +30,8 @@ namespace Dazor.Cli.Interaction {
     private static string AdjustPromptByType<T>(string prompt) {
       var type = typeof(T);
       if (type == typeof(bool)) return prompt + " (Y/N)";
-      if (type == typeof(OffOrOn)) return prompt + " (off/on)";
+      if (type == typeof(AutoFromClauseMode)) return prompt + " (off/on)";
+      if (type == typeof(AutoJoinClauseMode)) return prompt + " (off/fk/foreign-key/convention)";
       return prompt;
     }
 

@@ -6,6 +6,7 @@ using Dazor.Cli.Options;
 using Dazor.Cli.Interaction;
 using Dazor.Extensions;
 using Microsoft.Data.SqlClient;
+using Dazor.Config;
 
 namespace Dazor.Cli {
   internal class Parser {
@@ -87,6 +88,7 @@ namespace Dazor.Cli {
       var options = new InitOptions(
         GetConnectionString(),
         GetAutoFromClause(),
+        GetAutoJoinClause(),
         GetAutoParameterNameSuffix(),
         GetGitHook(),
         GetDefaultSeed());
@@ -209,16 +211,20 @@ namespace Dazor.Cli {
     }
 
     // TODO: Suggest "On" if not specified.
-    private OffOrOn GetAutoFromClause()
-      => GetArgAndPrompt<OffOrOn>("Do you want automatic FROM clause insertion?", Opts.AutoFromClause);
+    private AutoFromClauseMode GetAutoFromClause()
+      => GetArgAndPrompt<AutoFromClauseMode>("Do you want automatic FROM clause insertion?", Opts.AutoFromClause);
+
+    // TODO: Suggest "ForeignKey" if not specified.
+    private AutoJoinClauseMode GetAutoJoinClause()
+      => GetArgAndPrompt<AutoJoinClauseMode>("How do you want incomplete JOINs to be handled?", Opts.AutoJoinClause);
 
     // TODO: Suggest "QueryParameters" if not specified.
     private string GetAutoParameterNameSuffix()
       => GetArgAndPrompt<string>("What suffix do you want automatically stripped off your query parameters?", Opts.AutoParameterNameSuffix);
 
     // TODO: Suggest "On" if not specified.
-    private OffOrOn GetGitHook()
-      => GetArgAndPrompt<OffOrOn>("Do you want a helpful git-hook installed?", Opts.GitHook);
+    private GitHookMode GetGitHook()
+      => GetArgAndPrompt<GitHookMode>("Do you want a helpful git-hook installed?", Opts.GitHook);
 
     // TODO: Suggest "default" if not specified.
     private string GetDefaultSeed()
