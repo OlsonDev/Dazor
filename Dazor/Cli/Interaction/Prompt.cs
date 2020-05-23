@@ -32,6 +32,7 @@ namespace Dazor.Cli.Interaction {
       if (type == typeof(bool)) return prompt + " (Y/N)";
       if (type == typeof(AutoFromClauseMode)) return prompt + " (off/on)";
       if (type == typeof(AutoJoinClauseMode)) return prompt + " (off/fk/foreign-key/convention)";
+      if (type == typeof(GitHookMode)) return prompt + " (off/on)";
       return prompt;
     }
 

@@ -6,4 +6,7 @@
 /**/.vscode/
 *.suo
 *.user
+
+# Generated files from testing the app locally
 dazor.json
+SQL/**

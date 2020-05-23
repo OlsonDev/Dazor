@@ -16,6 +16,7 @@ namespace Dazor.Cli.Commands {
 
     public async Task<Result> ExecuteAsync() {
       await WriteDazorJsonAsync();
+      await WriteRootDirectoryContentAsync();
       await InitDazorSchemaAsync();
       return Result.Success;
     }
@@ -34,6 +35,25 @@ namespace Dazor.Cli.Commands {
       // TODO: Not really necessary the way the Parser insists on completing all fields at the moment.
       var boundConfig = fileConfig.BindDefaults();
       return boundConfig.WriteAsync();
+    }
+
+    private async Task WriteRootDirectoryContentAsync() {
+      var rootDirectory = Path.GetFullPath(_options.RootDirectory);
+      var migrationsDirectory = Path.Combine(rootDirectory, "Migrations");
+      var seedsDirectory = Path.Combine(rootDirectory, "Seeds");
+
+      Directory.CreateDirectory(rootDirectory);
+      Directory.CreateDirectory(migrationsDirectory);
+      Directory.CreateDirectory(seedsDirectory);
+
+      // TODO: These should come from a .resx file or something.
+      var tasks = new Task[] {
+        File.WriteAllTextAsync(Path.Combine(rootDirectory, "README.md"), "# Dazor"),
+        File.WriteAllTextAsync(Path.Combine(migrationsDirectory, "README.md"), "# Dazor Migrations"),
+        File.WriteAllTextAsync(Path.Combine(seedsDirectory, "README.md"), "# Dazor Seeds"),
+      };
+
+      await Task.WhenAll(tasks);
     }
 
     private async Task InitDazorSchemaAsync() {
