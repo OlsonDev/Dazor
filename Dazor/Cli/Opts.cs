@@ -6,5 +6,9 @@ namespace Dazor.Cli {
     public static string[] IntegratedSecurity = { "-is", "--integrated-security" };
     public static string[] User = { "-u", "--user" };
     public static string[] Password = { "-pw", "--password" };
+    public static string[] AutoFromClause = { "--auto-from" };
+    public static string[] AutoParameterNameSuffix = { "--auto-param-suffix" };
+    public static string[] GitHook = { "--git-hook" };
+    public static string[] DefaultSeed = { "--default-seed" };
   }
 }

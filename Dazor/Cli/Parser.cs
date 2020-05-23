@@ -84,9 +84,12 @@ namespace Dazor.Cli {
     private IParseResult ParseInit() {
       // TODO: Use something like System.Data.Sql.SqlDataSourceEnumerator to get
       //       network-local SQL Server data sources.
-      var options = new InitOptions {
-        ConnectionString = GetConnectionString()
-      };
+      var options = new InitOptions(
+        GetConnectionString(),
+        GetAutoFromClause(),
+        GetAutoParameterNameSuffix(),
+        GetGitHook(),
+        GetDefaultSeed());
       var command = new InitCommand(options);
       return new CommandResult(command);
     }
@@ -176,8 +179,8 @@ namespace Dazor.Cli {
       }
 
       var builder = new SqlConnectionStringBuilder {
-        DataSource = GetArgAndPrompt<string>("Data source?", Opts.DataSource),
-        InitialCatalog = GetArgAndPrompt<string>("Initial catalog?", Opts.Database),
+        DataSource = GetArgAndPrompt<string>("Data source (database server address)?", Opts.DataSource),
+        InitialCatalog = GetArgAndPrompt<string>("Initial catalog (database name)?", Opts.Database),
       };
 
       var hasIntegratedSecurity = HasArg(Opts.IntegratedSecurity);
@@ -204,5 +207,21 @@ namespace Dazor.Cli {
 
       return builder.ToString();
     }
+
+    // TODO: Suggest "On" if not specified.
+    private OffOrOn GetAutoFromClause()
+      => GetArgAndPrompt<OffOrOn>("Do you want automatic FROM clause insertion?", Opts.AutoFromClause);
+
+    // TODO: Suggest "QueryParameters" if not specified.
+    private string GetAutoParameterNameSuffix()
+      => GetArgAndPrompt<string>("What suffix do you want automatically stripped off your query parameters?", Opts.AutoParameterNameSuffix);
+
+    // TODO: Suggest "On" if not specified.
+    private OffOrOn GetGitHook()
+      => GetArgAndPrompt<OffOrOn>("Do you want a helpful git-hook installed?", Opts.GitHook);
+
+    // TODO: Suggest "default" if not specified.
+    private string GetDefaultSeed()
+      => GetArgAndPrompt<string>("What do you want the name of your default seed to be?", Opts.DefaultSeed);
   }
 }

@@ -29,6 +29,7 @@ namespace Dazor.Cli.Interaction {
     private static string AdjustPromptByType<T>(string prompt) {
       var type = typeof(T);
       if (type == typeof(bool)) return prompt + " (Y/N)";
+      if (type == typeof(OffOrOn)) return prompt + " (off/on)";
       return prompt;
     }
 
