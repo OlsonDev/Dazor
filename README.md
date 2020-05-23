@@ -164,7 +164,7 @@ public class ProductQuery {
 ```json5
 {
     "connectionString": "Data Source=localhost;Initial Catalog=YourAppDatabase;Integrated Security=True",
-    "rootDirectory": "./SQL", // where migrations and seeds will be put, relative to this dazor.json file
+    "rootDirectory": "./SQL", // (default); where migrations and seeds will be put, relative to this dazor.json file
     "autoFromClause": "off", // off, on (default)
     "autoJoinClause": "off", // off, fk or foreignKey (default), convention
     "autoParameterNameSuffix": "QueryParameters", // (default); allows for @: MyProject.CommonNamespace.CommonQueryParameters to be automatically named Common
