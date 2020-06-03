@@ -69,8 +69,11 @@ namespace Dazor.Cli {
 
     private Task<IParseResult> ParseApplySeedAsync() => throw new NotImplementedException();
 
-    private Task<IParseResult> ParseCleanDataAsync() => throw new NotImplementedException();
-
+    private async Task<IParseResult> ParseCleanDataAsync() {
+      var config = await ReadConfigAsync();
+      var options = new CleanDataOptions(GetDryRun());
+      return new CommandResult(new CleanDataCommand(options, config));
+    }
     private async Task<IParseResult> ParseCleanSchemaAsync() {
       var config = await ReadConfigAsync();
       var options = new CleanSchemaOptions(GetDryRun());
