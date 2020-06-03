@@ -32,9 +32,7 @@ namespace Dazor.Cli.Commands {
         DefaultSeed = _options.DefaultSeed,
       };
 
-      // TODO: Not really necessary the way the Parser insists on completing all fields at the moment.
-      var boundConfig = fileConfig.BindDefaults();
-      return boundConfig.WriteAsync();
+      return Serializer.WriteAsync(fileConfig);
     }
 
     private async Task WriteRootDirectoryContentAsync() {

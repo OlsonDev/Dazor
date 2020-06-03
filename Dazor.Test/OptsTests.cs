@@ -10,6 +10,7 @@ namespace Dazor.Test {
   public class OptsTests {
     [Theory]
     [InlineData(typeof(InitOpts))]
+    [InlineData(typeof(CleanSchemaOpts))]
     public void OptsAreUnique(Type optsType) {
       var flags = BindingFlags.Public | BindingFlags.Static;
       Assert.True(optsType.IsAbstract && optsType.IsSealed, $"All `Dazor.Opts` classes should be `static`; {optsType.GetFriendlyName()} is not.");

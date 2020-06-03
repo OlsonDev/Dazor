@@ -19,12 +19,12 @@ namespace Dazor.Cli.Options {
       DefaultSeed = defaultSeed;
     }
 
-    public string ConnectionString { get; set; }
-    public string RootDirectory { get; set; }
-    public AutoFromClauseMode AutoFromClause { get; set; }
-    public AutoJoinClauseMode AutoJoinClause { get; set; }
-    public string AutoParameterNameSuffix { get; set; }
-    public GitHookMode GitHook { get; set; }
-    public string DefaultSeed { get; set; }
+    public string ConnectionString { get; }
+    public string RootDirectory { get; }
+    public AutoFromClauseMode AutoFromClause { get; }
+    public AutoJoinClauseMode AutoJoinClause { get; }
+    public string AutoParameterNameSuffix { get; }
+    public GitHookMode GitHook { get; }
+    public string DefaultSeed { get; }
   }
 }

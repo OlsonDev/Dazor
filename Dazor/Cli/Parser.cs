@@ -8,6 +8,7 @@ using Dazor.Extensions;
 using Microsoft.Data.SqlClient;
 using Dazor.Config;
 using Dazor.Cli.Opts;
+using System.Threading.Tasks;
 
 namespace Dazor.Cli {
   internal class Parser {
@@ -38,52 +39,54 @@ namespace Dazor.Cli {
       _options[key] = values;
     }
 
-    internal static IParseResult Parse(string[] args)
-      => new Parser(args).Parse();
+    internal static Task<IParseResult> ParseAsync(string[] args)
+      => new Parser(args).ParseAsync();
 
-    internal IParseResult Parse() {
+    internal async Task<IParseResult> ParseAsync() {
       try {
-        return Command switch
+        return await (Command switch
         {
-          "apply-seed" => ParseApplySeed(),
-          "clean-data" => ParseCleanData(),
-          "clean-schema" => ParseCleanSchema(),
-          "downgrade" => ParseDowngrade(),
-          "fix-seeds" => ParseFixSeeds(),
-          "generate" => ParseGenerate(),
-          "help" => ParseHelp(),
-          "init" => ParseInit(),
-          "migrate" => ParseMigrate(),
-          "new-seed" => ParseNewSeed(),
-          "rerun" => ParseRerun(),
-          "undo" => ParseUndo(),
-          "upgrade" => ParseUpgrade(),
-          "watch" => ParseWatch(),
-          _ => ParseNonexistent(),
-        };
+          "apply-seed" => ParseApplySeedAsync(),
+          "clean-data" => ParseCleanDataAsync(),
+          "clean-schema" => ParseCleanSchemaAsync(),
+          "downgrade" => ParseDowngradeAsync(),
+          "fix-seeds" => ParseFixSeedsAsync(),
+          "generate" => ParseGenerateAsync(),
+          "help" => ParseHelpAsync(),
+          "init" => ParseInitAsync(),
+          "migrate" => ParseMigrateAsync(),
+          "new-seed" => ParseNewSeedAsync(),
+          "rerun" => ParseRerunAsync(),
+          "undo" => ParseUndoAsync(),
+          "upgrade" => ParseUpgradeAsync(),
+          "watch" => ParseWatchAsync(),
+          _ => ParseNonexistentAsync(),
+        });
       } catch (ParseException ex) {
         return new ErrorResult(ex.Message);
       }
     }
 
-    private IParseResult ParseApplySeed() => throw new NotImplementedException();
+    private Task<IParseResult> ParseApplySeedAsync() => throw new NotImplementedException();
 
-    private IParseResult ParseCleanData() => throw new NotImplementedException();
+    private Task<IParseResult> ParseCleanDataAsync() => throw new NotImplementedException();
 
-    private IParseResult ParseCleanSchema() => throw new NotImplementedException();
-
-    private IParseResult ParseDowngrade() => throw new NotImplementedException();
-
-    private IParseResult ParseFixSeeds() => throw new NotImplementedException();
-
-    private IParseResult ParseGenerate() => throw new NotImplementedException();
-
-    private IParseResult ParseHelp() {
-      var command = new HelpCommand();
-      return new CommandResult(command);
+    private async Task<IParseResult> ParseCleanSchemaAsync() {
+      var config = await ReadConfigAsync();
+      var options = new CleanSchemaOptions(GetDryRun());
+      return new CommandResult(new CleanSchemaCommand(options, config));
     }
 
-    private IParseResult ParseInit() {
+    private Task<IParseResult> ParseDowngradeAsync() => throw new NotImplementedException();
+
+    private Task<IParseResult> ParseFixSeedsAsync() => throw new NotImplementedException();
+
+    private Task<IParseResult> ParseGenerateAsync() => throw new NotImplementedException();
+
+    private Task<IParseResult> ParseHelpAsync()
+      => Cmd(new HelpCommand());
+
+    private Task<IParseResult> ParseInitAsync() {
       // TODO: Use something like System.Data.Sql.SqlDataSourceEnumerator to get
       //       network-local SQL Server data sources.
       var options = new InitOptions(
@@ -94,24 +97,29 @@ namespace Dazor.Cli {
         GetAutoParameterNameSuffix(),
         GetGitHook(),
         GetDefaultSeed());
-      var command = new InitCommand(options);
-      return new CommandResult(command);
+      return Cmd(new InitCommand(options));
     }
 
-    private IParseResult ParseMigrate() => throw new NotImplementedException();
+    private Task<IParseResult> ParseMigrateAsync() => throw new NotImplementedException();
 
-    private IParseResult ParseNewSeed() => throw new NotImplementedException();
+    private Task<IParseResult> ParseNewSeedAsync() => throw new NotImplementedException();
 
-    private IParseResult ParseRerun() => throw new NotImplementedException();
+    private Task<IParseResult> ParseRerunAsync() => throw new NotImplementedException();
 
-    private IParseResult ParseUndo() => throw new NotImplementedException();
+    private Task<IParseResult> ParseUndoAsync() => throw new NotImplementedException();
 
-    private IParseResult ParseUpgrade() => throw new NotImplementedException();
+    private Task<IParseResult> ParseUpgradeAsync() => throw new NotImplementedException();
 
-    private IParseResult ParseWatch() => throw new NotImplementedException();
+    private Task<IParseResult> ParseWatchAsync() => throw new NotImplementedException();
 
-    private IParseResult ParseNonexistent()
-      => new ErrorResult($"dazor: '{Command}' is not a dazor command. See 'dazor help'.");
+    private Task<IParseResult> ParseNonexistentAsync()
+      => Task.FromResult<IParseResult>(new ErrorResult($"dazor: '{Command}' is not a dazor command. See 'dazor help'."));
+
+    private Task<IParseResult> Cmd(ICommand command)
+      => Task.FromResult<IParseResult>(new CommandResult(command));
+
+    private Task<BoundConfig> ReadConfigAsync()
+      => Serializer.ReadAsync(); // TODO: Handle errors gracefully
 
     private bool HasArg(string[] opts) {
       var optsFound = new HashSet<string>();
@@ -175,6 +183,11 @@ namespace Dazor.Cli {
         ? ""
         : string.Join(' ', firstArg);
       return Prompt.WithSuggestion<T>(prompt, suggestion);
+    }
+
+    private bool GetDryRun() {
+      // TODO: Optional args
+      return true;
     }
 
     private string GetConnectionString() {
