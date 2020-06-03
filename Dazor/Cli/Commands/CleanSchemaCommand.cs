@@ -42,13 +42,13 @@ namespace Dazor.Cli.Commands {
 
         SET @SQL = @SQL + @NewLine + '-- Temporal (system-versioned) tables';
         SELECT @SQL = @SQL + @NewLine + 'ALTER TABLE [' + SCHEMA_NAME(T.Schema_ID) + '].[' + T.Name + ']' + @NewLine + '  SET (SYSTEM_VERSIONING = OFF);'
-        from sys.Tables AS T
+        FROM sys.Tables AS T
         WHERE T.Schema_ID != @DazorSchemaID
           AND T.Temporal_Type = 2;
 
         SET @SQL = @SQL + @NewLine + '-- Tables';
         SELECT @SQL = @SQL + @NewLine + 'DROP TABLE [' + SCHEMA_NAME(T.Schema_ID) + '].[' + T.Name + '];'
-        from sys.Tables AS T
+        FROM sys.Tables AS T
         WHERE T.Schema_ID != @DazorSchemaID;
 
         SET @SQL = @SQL + @NewLine + '-- User Defined Types (UDTs)';
