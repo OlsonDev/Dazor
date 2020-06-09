@@ -93,7 +93,6 @@ namespace Dazor.Cli.Commands {
     private static readonly string GetCleanCommand = BuildDynamicCleanCommand + Environment.NewLine + Environment.NewLine + "SELECT @SQL;";
     private static readonly string ExecuteCleanCommand = BuildDynamicCleanCommand + Environment.NewLine + Environment.NewLine + "EXEC SP_ExecuteSQL @SQL;";
 
-
     public CleanDataCommand(CleanDataOptions options, BoundConfig config) {
       _options = options;
       _config = config;
