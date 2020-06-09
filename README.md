@@ -21,21 +21,26 @@ dazor watch
 # Dazor will error if no change is necessary.
 dazor upgrade
 # Apply all version scripts up to 18.
+# Dazor will error if there aren't at least 18 version scripts.
 # Dazor will error if the current version is >= 18.
 dazor upgrade to 18
 # Inspect the database's current version and then either upgrade or downgrade to the given version.
+# Dazor will error if there aren't at least 18 version scripts.
 # Dazor will error if no change is necessary.
 dazor migrate to 18
 # Undo the last script, rerun it.
 # Dazor will error if there is no version to rerun.
 dazor rerun last
 # Undo everything down to 18 and including 18, then upgrade.
+# Dazor will error if there aren't at least 18 version scripts.
 # Dazor will error if the current version is < 18.
 dazor rerun 18+
 # Undo everything down to 21 and including 21, then only run to 23 even if there are later version scripts.
+# Dazor will error if there aren't at least 23 version scripts.
 # Dazor will error if the current version is < 23.
 dazor rerun 21-23
 # Undo everything down to and including 18.
+# Dazor will error if there aren't at least 18 version scripts.
 # Dazor will error if current version is < 18.
 dazor undo 18+
 # Synonym (with same error conditions):
@@ -45,8 +50,10 @@ dazor downgrade to 17
 # Generate a data seed (SQL file containing insert statements reflecting the current database).
 dazor new-seed <name>
 # Clean data out of the database, then insert records from the given seed file.
+# Dazor will error if there is no seed with the given name.
 dazor apply-seed <seed-name>
 # Fix a database seed for a specific version; useful if the schema has changed since seeds were generated.
+# Dazor will error if there are no saved seeds.
 dazor fix-seeds
 
 # SCRUBBING COMMANDS:
