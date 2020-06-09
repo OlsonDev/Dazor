@@ -32,7 +32,9 @@ IF OBJECT_ID('Dazor.Result', 'U') IS NULL BEGIN
   INSERT Dazor.Result ( Name )
   VALUES
       ( 'Success' )
-    , ( 'Failure' );
+    , ( 'ParseError' )
+    , ( 'InternalError' )
+    , ( 'Failure');
 END
 
 IF OBJECT_ID('Dazor.MigrationType', 'U') IS NULL BEGIN
