@@ -11,7 +11,12 @@ namespace Dazor.Test {
     [Theory]
     [InlineData(typeof(CleanDataOpts))]
     [InlineData(typeof(CleanSchemaOpts))]
+    [InlineData(typeof(DowngradeOpts))]
     [InlineData(typeof(InitOpts))]
+    [InlineData(typeof(MigrateOpts))]
+    [InlineData(typeof(RerunOpts))]
+    [InlineData(typeof(UndoOpts))]
+    [InlineData(typeof(UpgradeOpts))]
     public void OptsAreUnique(Type optsType) {
       var flags = BindingFlags.Public | BindingFlags.Static;
       Assert.True(optsType.IsAbstract && optsType.IsSealed, $"All `Dazor.Opts` classes should be `static`; {optsType.GetFriendlyName()} is not.");
