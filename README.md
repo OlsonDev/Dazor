@@ -5,47 +5,74 @@
 cd MyProject
 # Initialize a new Dazor project
 dazor init
-# Apply all Version scripts and then Repeatable scripts
-dazor migrate
-# Synonym:
-dazor upgrade
-# Apply all Version scripts up to 18
-dazor migrate to 18
-# Synonym:
-dazor upgrade to 18
-# Generate .dazor.cs files
+
+# CODE GENERATION COMMANDS:
+# Generate .dazor.cs files.
 dazor gen
-# Watch for .dazor file creation/changes and SQL schema changes, and generate .dazor.cs files
+# Watch for .dazor file creation/changes and SQL schema changes, and generate .dazor.cs files.
 dazor watch
-# Undo the last script, rerun it
+
+# VERSIONING COMMANDS:
+# Note ALL commands run new/modified repeatable scripts after performing their versioning operation(s).
+# Keep in mind, your newly-versioned database may not be compatible with your repeatable scripts -- usually
+# this is more likely if you're downgrading.
+
+# Apply all version scripts.
+# Dazor will error if no change is necessary.
+dazor upgrade
+# Apply all version scripts up to 18.
+# Dazor will error if the current version is >= 18.
+dazor upgrade to 18
+# Inspect the database's current version and then either upgrade or downgrade to the given version.
+# Dazor will error if no change is necessary.
+dazor migrate to 18
+# Undo the last script, rerun it.
+# Dazor will error if there is no version to rerun.
 dazor rerun last
-# Undo everything down to 18 and including 18, then rerun to current
+# Undo everything down to 18 and including 18, then upgrade.
+# Dazor will error if the current version is < 18.
 dazor rerun 18+
-# Undo everything down to 21 and including 21, then only run to 23 even if there are later Version scripts
+# Undo everything down to 21 and including 21, then only run to 23 even if there are later version scripts.
+# Dazor will error if the current version is < 23.
 dazor rerun 21-23
-# Undo everything down to and including 18
+# Undo everything down to and including 18.
+# Dazor will error if current version is < 18.
 dazor undo 18+
-# Synonym:
+# Synonym (with same error conditions):
 dazor downgrade to 17
-# Generate a data seed (SQL file containing insert statements)
+
+# SEED COMMANDS:
+# Generate a data seed (SQL file containing insert statements reflecting the current database).
 dazor new-seed <name>
-# Clean data out of the database, insert records from seed file
+# Clean data out of the database, then insert records from the given seed file.
 dazor apply-seed <seed-name>
-# Remove all objects from of the database
-dazor clean-schema
-# Truncate/delete all data out of the database
-dazor clean-data
-# Fix a database seed for a specific version; useful if schema has changed since seeds were generated
+# Fix a database seed for a specific version; useful if the schema has changed since seeds were generated.
 dazor fix-seeds
-# Get help information
+
+# SCRUBBING COMMANDS:
+# Remove all objects from the database.
+dazor clean-schema
+# Truncate/delete all data out of the database.
+dazor clean-data
+
+# HELP COMMANDS:
 dazor help
-dazor help migrate
-dazor help upgrade
+
 dazor help gen
 dazor help watch
+
+dazor help upgrade
+dazor help migrate
 dazor help rerun
 dazor help undo
 dazor help downgrade
+
+dazor help new-seed
+dazor help apply-seed
+dazor help fix-seeds
+
+dazor help clean-schema
+dazor help clean-data
 ```
 
 ## Automatic joins via foreign key detection
