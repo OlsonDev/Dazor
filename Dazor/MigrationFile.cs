@@ -20,10 +20,10 @@ namespace Dazor {
     public short? Version => (_pathMetadata ??= ComputePathMetadata()).Version;
     public string? VersionString => (_pathMetadata ??= ComputePathMetadata()).VersionString;
     public string Description => (_pathMetadata ??= ComputePathMetadata()).Description;
-    public IHashValue HashValue => _hashValue ??= ComputeHash();
+    public IHashValue HashValue => _hashValue ??= ComputeHashValue();
     public MigrationFile(string path) => Path = path;
 
-    private IHashValue ComputeHash() {
+    private IHashValue ComputeHashValue() {
       using var stream = new FileStream(Path, FileMode.Open, FileAccess.Read, FileShare.Read);
       return _hashValue = Hasher.ComputeHash(stream);
     }
