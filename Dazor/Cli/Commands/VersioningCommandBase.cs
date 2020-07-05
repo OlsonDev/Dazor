@@ -70,5 +70,13 @@ namespace Dazor.Cli.Commands {
 
       return new ValidationContext(migrationFiles, migrations);
     }
+
+    protected async Task ApplyMigrationAsync(MigrationFile migration, SqlConnection connection) {
+      using var transaction = await connection.BeginTransactionAsync();
+      var cmd = await File.ReadAllTextAsync(migration.Path, System.Text.Encoding.UTF8);
+      await connection.ExecuteAsync(cmd, transaction: transaction);
+      // TODO: Log migration...
+      await transaction.CommitAsync();
+    }
   }
 }

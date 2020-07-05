@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dazor.Cli.Options;
 using Dazor.Config;
-using Dazor.Dto;
+using Microsoft.Data.SqlClient;
 
 namespace Dazor.Cli.Commands {
   internal class UpgradeCommand : VersioningCommandBase {
@@ -39,19 +37,21 @@ namespace Dazor.Cli.Commands {
       return Result.Success;
     }
 
-    private Task UpgradeAsync(short toVersion, ValidationContext validationContext) {
+    private async Task UpgradeAsync(short toVersion, ValidationContext validationContext) {
       var startVersion = validationContext.MaxDatabasedMigrationVersion;
       var newerVersions = validationContext
         .MigrationFiles
         .Where(mf => mf.MigrationType == MigrationType.Version && mf.Version > startVersion)
         .OrderBy(mf => mf.Version);
 
+      using var connection = new SqlConnection(Config.ConnectionString);
+      await connection.OpenAsync();
       foreach (var migration in newerVersions) {
         if (migration.Version > toVersion) break;
         LogUpgradingSingle(migration.Version!.Value, migration.Description);
+        await ApplyMigrationAsync(migration, connection);
       }
-
-      return Task.CompletedTask;
+      await connection.CloseAsync();
     }
 
     private void LogCantUpgrade(short toVersion, short maxMigrationVersion) {
