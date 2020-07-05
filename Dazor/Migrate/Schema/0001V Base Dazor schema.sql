@@ -85,7 +85,8 @@ IF OBJECT_ID('Dazor.Migration', 'U') IS NULL BEGIN
     , MigrationTypeID    TINYINT        NOT NULL
     , Version            SMALLINT       NOT NULL
     , SizeInBytes        BIGINT         NOT NULL
-    , Blake3Hash         BINARY(512)    NOT NULL
+    , HashValue          BINARY(8)      NOT NULL
+    , HashFunction       NVARCHAR(50)   NOT NULL
     , Path               NVARCHAR(MAX)  NOT NULL
     , ExecutionTimeInMs  INT            NOT NULL
     , CONSTRAINT PK_Migration PRIMARY KEY ( MigrationID )
