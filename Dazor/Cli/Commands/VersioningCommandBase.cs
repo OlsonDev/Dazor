@@ -1,5 +1,4 @@
 using System;
-using System.Data.HashFunction.xxHash;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +6,6 @@ using Dazor.Config;
 using Microsoft.Data.SqlClient;
 using Dapper;
 using Dazor.Dto;
-using System.Collections.Generic;
 
 namespace Dazor.Cli.Commands {
   internal abstract class VersioningCommandBase : ICommand {
