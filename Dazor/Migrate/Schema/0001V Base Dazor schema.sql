@@ -62,7 +62,7 @@ IF OBJECT_ID('Dazor.Execution', 'U') IS NULL BEGIN
     , ExecutionTimeInMs  INT                NULL
     , CONSTRAINT PK_Execution PRIMARY KEY ( ExecutionID )
     , CONSTRAINT FK_Execution_Result FOREIGN KEY (ResultID) REFERENCES Dazor.Result (ResultID)
-  )
+  );
 END
 
 IF OBJECT_ID('Dazor.Log', 'U') IS NULL BEGIN
@@ -75,7 +75,7 @@ IF OBJECT_ID('Dazor.Log', 'U') IS NULL BEGIN
     , CONSTRAINT PK_Log PRIMARY KEY ( LogID )
     , CONSTRAINT FK_Log_Execution FOREIGN KEY (ExecutionID) REFERENCES Dazor.Execution (ExecutionID)
     , CONSTRAINT FK_Log_LogLevel  FOREIGN KEY (LogLevelID)  REFERENCES Dazor.LogLevel (LogLevelID)
-  )
+  );
 END
 
 IF OBJECT_ID('Dazor.Migration', 'U') IS NULL BEGIN
@@ -92,7 +92,7 @@ IF OBJECT_ID('Dazor.Migration', 'U') IS NULL BEGIN
     , CONSTRAINT PK_Migration PRIMARY KEY ( MigrationID )
     , CONSTRAINT FK_Migration_MigrationType FOREIGN KEY (MigrationTypeID) REFERENCES Dazor.MigrationType (MigrationTypeID)
     , CONSTRAINT UQ_Migration_MigrationType_Version UNIQUE (MigrationTypeID, Version)
-  )
+  );
 END
 
 -- Common TVP types to be used in generated queries...

@@ -1,5 +1,5 @@
 namespace Dazor.Config {
-  public enum GitHookMode {
+  public enum GitHookMode : byte {
     Off,
     On,
   }

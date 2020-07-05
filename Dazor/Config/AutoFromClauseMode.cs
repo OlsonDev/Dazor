@@ -1,5 +1,5 @@
 namespace Dazor.Config {
-  public enum AutoFromClauseMode {
+  public enum AutoFromClauseMode : byte {
     Off,
     On,
   }

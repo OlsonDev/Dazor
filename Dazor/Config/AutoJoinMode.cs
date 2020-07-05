@@ -1,5 +1,5 @@
 namespace Dazor.Config {
-  public enum AutoJoinClauseMode {
+  public enum AutoJoinClauseMode : byte {
     Off,
     ForeignKey,
     Convention,

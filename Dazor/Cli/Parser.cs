@@ -74,6 +74,7 @@ namespace Dazor.Cli {
       var options = new CleanDataOptions(GetDryRun());
       return new CommandResult(new CleanDataCommand(options, config));
     }
+
     private async Task<IParseResult> ParseCleanSchemaAsync() {
       var config = await ReadConfigAsync();
       var options = new CleanSchemaOptions(GetDryRun());
@@ -111,7 +112,11 @@ namespace Dazor.Cli {
 
     private Task<IParseResult> ParseUndoAsync() => throw new NotImplementedException();
 
-    private Task<IParseResult> ParseUpgradeAsync() => throw new NotImplementedException();
+    private async Task<IParseResult> ParseUpgradeAsync() {
+      var config = await ReadConfigAsync();
+      var options = new UpgradeOptions(GetToVersion());
+      return new CommandResult(new UpgradeCommand(options, config));
+    }
 
     private Task<IParseResult> ParseWatchAsync() => throw new NotImplementedException();
 
@@ -192,6 +197,11 @@ namespace Dazor.Cli {
       // TODO: Optional args
       return true;
     }
+
+    // TODO: Proper implementation with prompt if failure...
+    private string GetToVersion() => _options.TryGetValue("", out var values)
+      ? values.Skip(1).First()
+      : throw new InvalidOperationException("Specify `to` next time...");
 
     private string GetConnectionString() {
       if (TryGetArg(out var connectionString, InitOpts.ConnectionString)) {
