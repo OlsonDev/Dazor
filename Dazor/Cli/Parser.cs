@@ -115,7 +115,7 @@ namespace Dazor.Cli {
     private async Task<IParseResult> ParseUpgradeAsync() {
       var config = await ReadConfigAsync();
       var options = new UpgradeOptions(GetToVersion());
-      return new CommandResult(new UpgradeCommand(options, config));
+      return new CommandResult(new UpgradeCommand(options, config, CommandLineArgs));
     }
 
     private Task<IParseResult> ParseWatchAsync() => throw new NotImplementedException();

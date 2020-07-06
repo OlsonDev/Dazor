@@ -9,11 +9,11 @@ namespace Dazor.Cli.Commands {
   internal class UpgradeCommand : VersioningCommandBase {
     private readonly UpgradeOptions _options;
 
-    public UpgradeCommand(UpgradeOptions options, BoundConfig config)
-      : base(config)
+    public UpgradeCommand(UpgradeOptions options, BoundConfig config, string[] commandLineArgs)
+      : base(config, commandLineArgs)
       => _options = options;
 
-    public override async Task<Result> ExecuteAsync() {
+    protected override async Task<Result> ExecuteAsync(int executionId, SqlConnection connection) {
       var validationContext = await ValidateAsync();
       // TODO: This needs to account for UndoVersions, or the query does.
       var maxDatabasedMigrationVersion = validationContext.MaxDatabasedMigrationVersion;
@@ -33,25 +33,22 @@ namespace Dazor.Cli.Commands {
       }
 
       LogUpgradingFromXToY(toVersion, maxDatabasedMigrationVersion);
-      await UpgradeAsync(toVersion, validationContext);
+      await UpgradeAsync(toVersion, validationContext, connection);
       return Result.Success;
     }
 
-    private async Task UpgradeAsync(short toVersion, ValidationContext validationContext) {
+    private async Task UpgradeAsync(short toVersion, ValidationContext validationContext, SqlConnection connection) {
       var startVersion = validationContext.MaxDatabasedMigrationVersion;
       var newerVersions = validationContext
         .MigrationFiles
         .Where(mf => mf.MigrationType == MigrationType.Version && mf.Version > startVersion)
         .OrderBy(mf => mf.Version);
 
-      using var connection = new SqlConnection(Config.ConnectionString);
-      await connection.OpenAsync();
       foreach (var migration in newerVersions) {
         if (migration.Version > toVersion) break;
         LogUpgradingSingle(migration.Version!.Value, migration.Description);
         await ApplyMigrationAsync(migration, connection);
       }
-      await connection.CloseAsync();
     }
 
     private void LogCantUpgrade(short toVersion, short maxMigrationVersion) {

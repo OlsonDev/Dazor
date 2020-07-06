@@ -8,12 +8,9 @@ using Dapper;
 using Dazor.Dto;
 
 namespace Dazor.Cli.Commands {
-  internal abstract class VersioningCommandBase : ICommand {
-    protected BoundConfig Config { get; }
-    public VersioningCommandBase(BoundConfig config)
-      => Config = config;
-
-    public abstract Task<Result> ExecuteAsync();
+  internal abstract class VersioningCommandBase : PostInitCommandBase {
+    public VersioningCommandBase(BoundConfig config, string[] commandLineArgs)
+      : base(config, commandLineArgs) { }
 
     protected async Task<ValidationContext> ValidateAsync() {
       var relativeDirectory = Path.Combine(Config.RootDirectory, "Migrations");
