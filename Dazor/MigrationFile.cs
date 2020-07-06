@@ -13,13 +13,14 @@ namespace Dazor {
 
     private string? _fileName;
     private IHashValue? _hashValue;
-    private PathMetadata? _pathMetadata;
+    private FileMetadata? _fileMetadata;
     public string Path { get; }
     public string FileName => _fileName ??= System.IO.Path.GetFileNameWithoutExtension(Path);
-    public MigrationType MigrationType => (_pathMetadata ??= ComputePathMetadata()).MigrationType;
-    public short? Version => (_pathMetadata ??= ComputePathMetadata()).Version;
-    public string? VersionString => (_pathMetadata ??= ComputePathMetadata()).VersionString;
-    public string Description => (_pathMetadata ??= ComputePathMetadata()).Description;
+    public long SizeInBytes => (_fileMetadata ??= ComputeFileMetadata()).SizeInBytes;
+    public MigrationType MigrationType => (_fileMetadata ??= ComputeFileMetadata()).MigrationType;
+    public short? Version => (_fileMetadata ??= ComputeFileMetadata()).Version;
+    public string? VersionString => (_fileMetadata ??= ComputeFileMetadata()).VersionString;
+    public string Description => (_fileMetadata ??= ComputeFileMetadata()).Description;
     public IHashValue HashValue => _hashValue ??= ComputeHashValue();
     public MigrationFile(string path) => Path = path;
 
@@ -28,9 +29,10 @@ namespace Dazor {
       return _hashValue = Hasher.ComputeHash(stream);
     }
 
-    private PathMetadata ComputePathMetadata() {
+    private FileMetadata ComputeFileMetadata() {
+      var sizeInBytes = new FileInfo(Path).Length;
       // TODO: Enforce good practices; all types should be in specific directories by convention; repeatables shouldn't need a prefix.
-      if (FileName.StartsWith("R ")) return new PathMetadata(MigrationType.Repeatable, null, FileName[2..]);
+      if (FileName.StartsWith("R ")) return new FileMetadata(sizeInBytes, MigrationType.Repeatable, null, FileName[2..]);
       var match = VersionRegex.Match(FileName);
       if (match.Success) {
         var version = match.Groups["version"].Value;
@@ -39,17 +41,23 @@ namespace Dazor {
         var type = postfix == "V"
           ? MigrationType.Version
           : MigrationType.UndoVersion;
-        return new PathMetadata(type, version, description);
+        return new FileMetadata(sizeInBytes, type, version, description);
       }
-      return new PathMetadata(MigrationType.Invalid, null, FileName);
+      return new FileMetadata(sizeInBytes, MigrationType.Invalid, null, FileName);
     }
 
-    private class PathMetadata {
+    private class FileMetadata {
+      public long SizeInBytes { get; set; }
       public MigrationType MigrationType { get; set; }
       public short? Version { get; set; }
       public string? VersionString { get; set; }
       public string Description { get; set; }
-      public PathMetadata(MigrationType migrationType, string? version, string description) {
+      public FileMetadata(
+        long sizeInBytes,
+        MigrationType migrationType,
+        string? version,
+        string description) {
+        SizeInBytes = sizeInBytes;
         MigrationType = migrationType;
         VersionString = version;
         Version = short.TryParse(version, out var parsed) ? parsed : (short)0;

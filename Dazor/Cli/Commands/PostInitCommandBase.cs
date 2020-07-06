@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Dazor.Config;
 using Microsoft.Data.SqlClient;
 using Dapper;
+using System;
 
 namespace Dazor.Cli.Commands {
   internal abstract class PostInitCommandBase : ICommand {
@@ -28,8 +29,16 @@ namespace Dazor.Cli.Commands {
       ";
 
       var executionId = await connection.ExecuteScalarAsync<int>(insertCmd, new { args = string.Join(" ", CommandLineArgs) });
-      System.Console.WriteLine($"ExecutionID: {executionId}");
-      var result = await ExecuteAsync(executionId, connection);
+
+      var result = Result.InternalError;
+      try {
+        result = await ExecuteAsync(executionId, connection);
+      } catch (Exception ex) {
+        stopwatch.Stop();
+        Console.Error.WriteLine(ex);
+        // TODO: Insert Dazor.Log record...
+      }
+
       stopwatch.Stop();
 
       var updateCmd = @"

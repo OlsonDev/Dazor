@@ -82,6 +82,7 @@ IF OBJECT_ID('Dazor.Migration', 'U') IS NULL BEGIN
   CREATE TABLE Dazor.Migration (
       MigrationID        BIGINT         NOT NULL IDENTITY
     , DateTimeUtc        DATETIME2(7)   NOT NULL
+    , ExecutionID        BIGINT         NOT NULL
     , MigrationTypeID    TINYINT        NOT NULL
     , Version            SMALLINT       NOT NULL
     , SizeInBytes        BIGINT         NOT NULL
@@ -90,6 +91,7 @@ IF OBJECT_ID('Dazor.Migration', 'U') IS NULL BEGIN
     , Path               NVARCHAR(MAX)  NOT NULL
     , ExecutionTimeInMs  INT            NOT NULL
     , CONSTRAINT PK_Migration PRIMARY KEY ( MigrationID )
+    , CONSTRAINT FK_Migration_Execution     FOREIGN KEY (ExecutionID)     REFERENCES Dazor.Execution     (ExecutionID)
     , CONSTRAINT FK_Migration_MigrationType FOREIGN KEY (MigrationTypeID) REFERENCES Dazor.MigrationType (MigrationTypeID)
     , CONSTRAINT UQ_Migration_MigrationType_Version UNIQUE (MigrationTypeID, Version)
   );

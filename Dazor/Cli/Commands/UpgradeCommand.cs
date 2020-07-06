@@ -33,11 +33,11 @@ namespace Dazor.Cli.Commands {
       }
 
       LogUpgradingFromXToY(toVersion, maxDatabasedMigrationVersion);
-      await UpgradeAsync(toVersion, validationContext, connection);
+      await UpgradeAsync(toVersion, validationContext, executionId, connection);
       return Result.Success;
     }
 
-    private async Task UpgradeAsync(short toVersion, ValidationContext validationContext, SqlConnection connection) {
+    private async Task UpgradeAsync(short toVersion, ValidationContext validationContext, int executionId, SqlConnection connection) {
       var startVersion = validationContext.MaxDatabasedMigrationVersion;
       var newerVersions = validationContext
         .MigrationFiles
@@ -47,7 +47,7 @@ namespace Dazor.Cli.Commands {
       foreach (var migration in newerVersions) {
         if (migration.Version > toVersion) break;
         LogUpgradingSingle(migration.Version!.Value, migration.Description);
-        await ApplyMigrationAsync(migration, connection);
+        await ApplyMigrationAsync(migration, executionId, connection);
       }
     }
 

@@ -6,6 +6,7 @@ using Dazor.Config;
 using Microsoft.Data.SqlClient;
 using Dapper;
 using Dazor.Dto;
+using System.Diagnostics;
 
 namespace Dazor.Cli.Commands {
   internal abstract class VersioningCommandBase : PostInitCommandBase {
@@ -66,10 +67,49 @@ namespace Dazor.Cli.Commands {
       return new ValidationContext(migrationFiles, migrations);
     }
 
-    protected async Task ApplyMigrationAsync(MigrationFile migration, SqlConnection connection) {
+    protected async Task ApplyMigrationAsync(MigrationFile migration, int executionId, SqlConnection connection) {
+      var stopwatch = new Stopwatch();
+      stopwatch.Start();
       using var transaction = await connection.BeginTransactionAsync();
       var cmd = await File.ReadAllTextAsync(migration.Path, System.Text.Encoding.UTF8);
       await connection.ExecuteAsync(cmd, transaction: transaction);
+      stopwatch.Stop();
+
+      var insertCmd = @"
+        INSERT Dazor.Migration (
+            DateTimeUtc
+          , ExecutionID
+          , MigrationTypeID
+          , Version
+          , SizeInBytes
+          , HashValue
+          , HashFunction
+          , Path
+          , ExecutionTimeInMs
+        ) VALUES (
+            SYSUTCDATETIME()
+          , @ExecutionID
+          , @MigrationType
+          , @Version
+          , @SizeInBytes
+          , @HashValue
+          , 'xxHash-64'
+          , @Path
+          , @ExecutionTimeInMs
+        );
+      ";
+
+      var parameters = new {
+        executionId
+        , migration.MigrationType
+        , migration.Version
+        , migration.SizeInBytes
+        , hashValue = migration.HashValue.Hash
+        , migration.Path
+        , executionTimeInMs = stopwatch.ElapsedMilliseconds
+      };
+      await connection.ExecuteAsync(insertCmd, parameters, transaction: transaction);
+
       // TODO: Log migration...
       await transaction.CommitAsync();
     }
