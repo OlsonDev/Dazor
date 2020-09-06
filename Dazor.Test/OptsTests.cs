@@ -27,7 +27,7 @@ namespace Dazor.Test {
       foreach (var field in fields) {
         Assert.True(field.IsInitOnly, $"All fields in `Dazor.Opts` classes should be `readonly`; {optsType.GetFriendlyName()}.{field.Name} is not.");
         var value = field.GetValue(null);
-        Assert.True(!(value is null), $"All fields in `Dazor.Opts` classes shouldn't be `null`; {optsType.GetFriendlyName()}.{field.Name} is.");
+        Assert.True(value is not null, $"All fields in `Dazor.Opts` classes shouldn't be `null`; {optsType.GetFriendlyName()}.{field.Name} is.");
         Assert.True(value is string[], $"All fields in `Dazor.Opts` classes should be of type {typeof(string[]).GetFriendlyName()}; {optsType.GetFriendlyName()}.{field.Name} is not.");
         var values = (string[])value!;
         Assert.True(values.Any(), $"All fields in `Dazor.Opts` classes should have values; {optsType.GetFriendlyName()}.{field.Name} is empty.");

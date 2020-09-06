@@ -92,7 +92,7 @@ namespace Dazor.Cli {
 
     private Task<IParseResult> ParseInitAsync() {
       // TODO: Use something like System.Data.Sql.SqlDataSourceEnumerator to get
-      //       network-local SQL Server data sources.
+      //       network-local SQL Server data sources. Unfortunately not supported in .NET Core/.NET 5 yet.
       var options = new InitOptions(
         GetConnectionString(),
         GetRootDirectory(),
