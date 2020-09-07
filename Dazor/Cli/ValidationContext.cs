@@ -9,6 +9,8 @@ namespace Dazor.Cli {
 
     internal IEnumerable<MigrationFile> MigrationFiles { get; set; }
     internal IEnumerable<Migration> DatabasedMigrations { get; set; }
+    internal int InvalidMigrationNameCount { get; set; }
+    internal bool ShouldReportFailure => InvalidMigrationNameCount > 0;
 
     internal short MaxFileMigrationVersion
       => _maxFileMigrationVersion ??= MigrationFiles
@@ -23,9 +25,11 @@ namespace Dazor.Cli {
 
     public ValidationContext(
       IEnumerable<MigrationFile> migrationFiles,
-      IEnumerable<Migration> databasedMigrations) {
+      IEnumerable<Migration> databasedMigrations,
+      int invalidMigrationNameCount) {
       MigrationFiles = migrationFiles;
       DatabasedMigrations = databasedMigrations;
+      InvalidMigrationNameCount = invalidMigrationNameCount;
     }
   }
 }

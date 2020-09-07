@@ -19,8 +19,11 @@ namespace Dazor.Cli.Commands {
 
       var migrationFiles = Directory
         .GetFiles(relativeDirectory, "*.sql", SearchOption.AllDirectories)
-        .OrderBy(name => name)
         .Select(path => new MigrationFile(path))
+        .OrderBy(mf => mf.MigrationType != MigrationType.Invalid)
+        .ThenBy(mf => mf.MigrationType != MigrationType.Repeatable)
+        .ThenBy(mf => mf.Version)
+        .ThenBy(mf => mf.MigrationType) // Version before UndoVersion
         .ToArray();
 
       var cmd = @"
@@ -54,17 +57,38 @@ namespace Dazor.Cli.Commands {
 
       // TODO: Are all file versions >= 0001V?
       // TODO: Are there any versions present in the database, but not in the filesystem?
+      //       Keep in mind it could've been undone and its previous incarnation would've been valid.
       // TODO: Are all checksums the same as those in the database?
 
+      var invalidMigrationNameCount = 0;
       foreach (var migrationFile in migrationFiles) {
+        if (invalidMigrationNameCount > 0 && migrationFile.MigrationType != MigrationType.Invalid) {
+          break;
+        }
+        if (migrationFile.MigrationType == MigrationType.Invalid) invalidMigrationNameCount++;
+
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.Write(migrationFile.HashValue.AsHexString());
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine($"  {migrationFile.FileName}");
       }
+
+      if (invalidMigrationNameCount > 0) {
+        Console.ForegroundColor = ConsoleColor.Red;
+        if (invalidMigrationNameCount == 1) {
+          Console.Error.WriteLine("This migration has an invalid name; migrations must be prefixed 'R ' or be '0001(V|U) ' or higher.");
+        } else {
+          Console.Error.Write("These ");
+          Console.ForegroundColor = ConsoleColor.Magenta;
+          Console.Error.Write(invalidMigrationNameCount);
+          Console.ForegroundColor = ConsoleColor.Red;
+          Console.Error.WriteLine(" migrations have invalid names; migrations must be prefixed 'R ' or be '0001(V|U) ' or higher.");
+        }
+      }
+
       Console.ForegroundColor = foregroundColor;
 
-      return new ValidationContext(migrationFiles, migrations);
+      return new ValidationContext(migrationFiles, migrations, invalidMigrationNameCount);
     }
 
     protected static async Task ApplyMigrationAsync(MigrationFile migration, int executionId, SqlConnection connection) {
@@ -110,6 +134,81 @@ namespace Dazor.Cli.Commands {
       };
       await connection.ExecuteAsync(insertCmd, parameters, transaction: transaction);
       await transaction.CommitAsync();
+    }
+
+    protected static void LogOnVersionAfterRequested(short toVersion, short maxMigrationVersion) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("Already at version ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(maxMigrationVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("; can't upgrade to ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(toVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.WriteLine(".");
+      Console.ForegroundColor = foregroundColor;
+    }
+
+    protected static void LogAlreadyOnVersionRequested(short maxMigrationVersion) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Write("Already at version ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Write(maxMigrationVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("; no need to upgrade.");
+      Console.ForegroundColor = foregroundColor;
+    }
+
+    protected static void LogVersionRequestedDoesNotExist(short toVersion, short maxFileMigrationVersion) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("Max version is ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(maxFileMigrationVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("; can't upgrade to ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(toVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.WriteLine(".");
+      Console.ForegroundColor = foregroundColor;
+    }
+
+    protected static void LogUpgradingFromXToY(short toVersion, short maxMigrationVersion) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      if (maxMigrationVersion == 0) {
+        Console.Write("Upgrading from a clean database to version ");
+      } else {
+        Console.Write("Upgrading from version ");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write(maxMigrationVersion);
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.Write(" to ");
+      }
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Write(toVersion);
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      Console.WriteLine(".");
+      Console.ForegroundColor = foregroundColor;
+    }
+
+    protected static void LogUpgradingSingle(short version, string description) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      Console.Write("Upgrading to version ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Write(version);
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      Console.Write(" (");
+      Console.ForegroundColor = ConsoleColor.DarkMagenta;
+      Console.Write(description);
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      Console.WriteLine(").");
+      Console.ForegroundColor = foregroundColor;
     }
   }
 }
