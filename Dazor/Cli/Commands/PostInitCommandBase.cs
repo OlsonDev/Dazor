@@ -37,7 +37,7 @@ namespace Dazor.Cli.Commands {
         result = await ExecuteAsync(executionId, connection);
       } catch (Exception ex) {
         stopwatch.Stop();
-        Console.Error.WriteLine(ex);
+        ex.PrettyPrintTo(Console.Error);
         await connection.ExecuteAsync(@"
           INSERT Dazor.Log ( DateTimeUtc, ExecutionID, LogLevelID, Message )
           VALUES ( SYSUTCDATETIME(), @ExecutionID, @LogLevelID, @Message );
