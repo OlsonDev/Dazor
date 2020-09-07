@@ -109,8 +109,6 @@ namespace Dazor.Cli.Commands {
         , executionTimeInMs = stopwatch.ElapsedMilliseconds
       };
       await connection.ExecuteAsync(insertCmd, parameters, transaction: transaction);
-
-      // TODO: Log migration...
       await transaction.CommitAsync();
     }
   }
