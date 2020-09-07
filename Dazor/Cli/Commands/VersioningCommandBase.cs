@@ -21,7 +21,7 @@ namespace Dazor.Cli.Commands {
         .GetFiles(relativeDirectory, "*.sql", SearchOption.AllDirectories)
         .Select(path => new MigrationFile(path))
         .OrderBy(mf => mf.MigrationType != MigrationType.Invalid)
-        .ThenBy(mf => mf.MigrationType != MigrationType.Repeatable)
+        .ThenBy(mf => mf.MigrationType == MigrationType.Repeatable)
         .ThenBy(mf => mf.Version)
         .ThenBy(mf => mf.MigrationType) // Version before UndoVersion
         .ToArray();
@@ -69,7 +69,7 @@ namespace Dazor.Cli.Commands {
 
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.Write(migrationFile.HashValue.AsHexString());
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = ConsoleColorForMigrationType(migrationFile.MigrationType);
         Console.WriteLine($"  {migrationFile.FileName}");
       }
 
@@ -90,6 +90,16 @@ namespace Dazor.Cli.Commands {
 
       return new ValidationContext(migrationFiles, migrations, invalidMigrationNameCount);
     }
+
+    private static ConsoleColor ConsoleColorForMigrationType(MigrationType migrationType)
+      => migrationType switch
+      {
+        MigrationType.Version => ConsoleColor.Cyan,
+        MigrationType.UndoVersion => ConsoleColor.Blue,
+        MigrationType.Repeatable => ConsoleColor.DarkGreen,
+        MigrationType.Invalid => ConsoleColor.Red,
+        _ => throw new NotImplementedException(),
+      };
 
     protected static async Task ApplyMigrationAsync(MigrationFile migration, int executionId, SqlConnection connection) {
       var stopwatch = new Stopwatch();
