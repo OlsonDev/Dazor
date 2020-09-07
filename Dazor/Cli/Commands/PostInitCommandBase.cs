@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using Dapper;
 using System;
 using Microsoft.Extensions.Logging;
+using Dazor.Extensions;
 
 namespace Dazor.Cli.Commands {
   internal abstract class PostInitCommandBase : ICommand {
@@ -40,7 +41,7 @@ namespace Dazor.Cli.Commands {
         await connection.ExecuteAsync(@"
           INSERT Dazor.Log ( DateTimeUtc, ExecutionID, LogLevelID, Message )
           VALUES ( SYSUTCDATETIME(), @ExecutionID, @LogLevelID, @Message );
-        ", new { executionId, logLevelId = (int)LogLevel.Critical, ex.Message });
+        ", new { executionId, logLevelId = (int)LogLevel.Critical, message = ex.PrettyPrint() });
       }
 
       stopwatch.Stop();

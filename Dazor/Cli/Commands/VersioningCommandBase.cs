@@ -67,7 +67,7 @@ namespace Dazor.Cli.Commands {
       return new ValidationContext(migrationFiles, migrations);
     }
 
-    protected async Task ApplyMigrationAsync(MigrationFile migration, int executionId, SqlConnection connection) {
+    protected static async Task ApplyMigrationAsync(MigrationFile migration, int executionId, SqlConnection connection) {
       var stopwatch = new Stopwatch();
       stopwatch.Start();
       using var transaction = await connection.BeginTransactionAsync();

@@ -38,7 +38,7 @@ namespace Dazor.Cli.Commands {
       return Result.Success;
     }
 
-    private async Task UpgradeAsync(short toVersion, ValidationContext validationContext, int executionId, SqlConnection connection) {
+    private static async Task UpgradeAsync(short toVersion, ValidationContext validationContext, int executionId, SqlConnection connection) {
       var startVersion = validationContext.MaxDatabasedMigrationVersion;
       var newerVersions = validationContext
         .MigrationFiles
@@ -78,7 +78,7 @@ namespace Dazor.Cli.Commands {
       Console.ForegroundColor = foregroundColor;
     }
 
-    private void LogVersionRequestedDoesNotExist(short toVersion, short maxFileMigrationVersion) {
+    private static void LogVersionRequestedDoesNotExist(short toVersion, short maxFileMigrationVersion) {
       var foregroundColor = Console.ForegroundColor;
       Console.ForegroundColor = ConsoleColor.Red;
       Console.Error.Write("Max version is ");
