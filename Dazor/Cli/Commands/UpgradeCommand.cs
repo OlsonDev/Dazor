@@ -22,14 +22,15 @@ namespace Dazor.Cli.Commands {
         ? parsed
         : short.MaxValue;
 
-      // TODO: Validate that toVersion is even possible..
-
       if (toVersion < maxDatabasedMigrationVersion) {
-        LogCantUpgrade(toVersion, maxDatabasedMigrationVersion);
+        LogOnVersionAfterRequested(toVersion, maxDatabasedMigrationVersion);
         return Result.Failure;
       } else if (toVersion == maxDatabasedMigrationVersion) {
-        LogNoNeedToUpgrade(maxDatabasedMigrationVersion);
+        LogAlreadyOnVersionRequested(maxDatabasedMigrationVersion);
         return Result.Success;
+      } else if (validationContext.MaxFileMigrationVersion < toVersion) {
+        LogVersionRequestedDoesNotExist(toVersion, validationContext.MaxFileMigrationVersion);
+        return Result.Failure;
       }
 
       LogUpgradingFromXToY(toVersion, maxDatabasedMigrationVersion);
@@ -51,7 +52,7 @@ namespace Dazor.Cli.Commands {
       }
     }
 
-    private void LogCantUpgrade(short toVersion, short maxMigrationVersion) {
+    private static void LogOnVersionAfterRequested(short toVersion, short maxMigrationVersion) {
       var foregroundColor = Console.ForegroundColor;
       Console.ForegroundColor = ConsoleColor.Red;
       Console.Error.Write("Already at version ");
@@ -66,7 +67,7 @@ namespace Dazor.Cli.Commands {
       Console.ForegroundColor = foregroundColor;
     }
 
-    private void LogNoNeedToUpgrade(short maxMigrationVersion) {
+    private static void LogAlreadyOnVersionRequested(short maxMigrationVersion) {
       var foregroundColor = Console.ForegroundColor;
       Console.ForegroundColor = ConsoleColor.Red;
       Console.Write("Already at version ");
@@ -77,7 +78,22 @@ namespace Dazor.Cli.Commands {
       Console.ForegroundColor = foregroundColor;
     }
 
-    private void LogUpgradingFromXToY(short toVersion, short maxMigrationVersion) {
+    private void LogVersionRequestedDoesNotExist(short toVersion, short maxFileMigrationVersion) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("Max version is ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(maxFileMigrationVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("; can't upgrade to ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(toVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.WriteLine(".");
+      Console.ForegroundColor = foregroundColor;
+    }
+
+    private static void LogUpgradingFromXToY(short toVersion, short maxMigrationVersion) {
       var foregroundColor = Console.ForegroundColor;
       Console.ForegroundColor = ConsoleColor.Magenta;
       if (maxMigrationVersion == 0) {
@@ -96,7 +112,7 @@ namespace Dazor.Cli.Commands {
       Console.ForegroundColor = foregroundColor;
     }
 
-    private void LogUpgradingSingle(short version, string description) {
+    private static void LogUpgradingSingle(short version, string description) {
       var foregroundColor = Console.ForegroundColor;
       Console.ForegroundColor = ConsoleColor.Magenta;
       Console.Write("Upgrading to version ");
