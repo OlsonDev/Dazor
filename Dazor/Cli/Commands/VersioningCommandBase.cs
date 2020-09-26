@@ -146,12 +146,12 @@ namespace Dazor.Cli.Commands {
       await transaction.CommitAsync();
     }
 
-    protected static void LogOnVersionAfterRequested(short toVersion, short maxMigrationVersion) {
+    protected static void LogOnVersionAfterRequested(short toVersion, short maxDatabasedMigrationVersion) {
       var foregroundColor = Console.ForegroundColor;
       Console.ForegroundColor = ConsoleColor.Red;
       Console.Error.Write("Already at version ");
       Console.ForegroundColor = ConsoleColor.Yellow;
-      Console.Error.Write(maxMigrationVersion);
+      Console.Error.Write(maxDatabasedMigrationVersion);
       Console.ForegroundColor = ConsoleColor.Red;
       Console.Error.Write("; can't upgrade to ");
       Console.ForegroundColor = ConsoleColor.Yellow;
@@ -161,14 +161,67 @@ namespace Dazor.Cli.Commands {
       Console.ForegroundColor = foregroundColor;
     }
 
-    protected static void LogAlreadyOnVersionRequested(short maxMigrationVersion) {
+    protected static void LogOnVersionBeforeRequested(short toVersion, short maxDatabasedMigrationVersion) {
       var foregroundColor = Console.ForegroundColor;
       Console.ForegroundColor = ConsoleColor.Red;
-      Console.Write("Already at version ");
+      Console.Error.Write("Already at version ");
       Console.ForegroundColor = ConsoleColor.Yellow;
-      Console.Write(maxMigrationVersion);
+      Console.Error.Write(maxDatabasedMigrationVersion);
       Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine("; no need to upgrade.");
+      Console.Error.Write("; can't downgrade to ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(toVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.WriteLine(".");
+      Console.ForegroundColor = foregroundColor;
+    }
+
+    protected static void LogCantDowngradeToZeroOrLess(short toVersion, string commandName) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("Minimum version ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write("1");
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write($"; can't ");
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      Console.Error.Write(commandName);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write(" to ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(toVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.WriteLine(".");
+      Console.ForegroundColor = foregroundColor;
+    }
+
+    protected static void LogWhatNotParsed(string commandName, string what) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("Cannot ");
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      Console.Error.Write(commandName);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write($"; cannot parse `");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(what);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.WriteLine("`.");
+      Console.ForegroundColor = foregroundColor;
+    }
+
+    protected static void LogAlreadyOnVersionRequested(short maxDatabasedMigrationVersion, string commandName) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("Already at version ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(maxDatabasedMigrationVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("; no need to ");
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      Console.Error.Write(commandName);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write(".");
       Console.ForegroundColor = foregroundColor;
     }
 

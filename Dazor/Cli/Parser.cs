@@ -110,8 +110,11 @@ namespace Dazor.Cli {
 
     private Task<IParseResult> ParseRerunAsync() => throw new NotImplementedException();
 
-    private Task<IParseResult> ParseUndoAsync() => throw new NotImplementedException();
-
+    private async Task<IParseResult> ParseUndoAsync() {
+      var config = await ReadConfigAsync();
+      var options = new UndoOptions(GetUndoWhat());
+      return new CommandResult(new UndoCommand(options, config, CommandLineArgs));
+    }
     private async Task<IParseResult> ParseUpgradeAsync() {
       var config = await ReadConfigAsync();
       var options = new UpgradeOptions(GetToVersion());
@@ -197,6 +200,13 @@ namespace Dazor.Cli {
       // TODO: Optional args
       return true;
     }
+
+    // TODO: Proper implementation with prompt if failure...
+    // TODO: Should probably return everything passed instead of splitting it by options matched; currently `dazor undo to -17`
+    //       erroneously logs that it can't parse `to` instead of logging that it can't downgrade to zero or less.
+    private string GetUndoWhat() => _options.TryGetValue("", out var values)
+      ? string.Join(' ', values)
+      : throw new InvalidOperationException("Specify `what` next time...");
 
     // TODO: Proper implementation with prompt if failure...
     private string GetToVersion() => _options.TryGetValue("", out var values)

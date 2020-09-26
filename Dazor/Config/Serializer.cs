@@ -8,7 +8,7 @@ namespace Dazor.Config {
     internal static async Task<BoundConfig> ReadAsync() {
       using var stream = File.OpenRead("dazor.json");
       var fileConfig = await JsonSerializer.DeserializeAsync<FileConfig>(stream, BuildOptions());
-      return fileConfig.BindDefaults();
+      return fileConfig!.BindDefaults();
     }
 
     internal static Task WriteAsync(FileConfig config)

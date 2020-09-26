@@ -26,7 +26,7 @@ namespace Dazor.Cli.Commands {
         LogOnVersionAfterRequested(toVersion, maxDatabasedMigrationVersion);
         return Result.Failure;
       } else if (toVersion == maxDatabasedMigrationVersion) {
-        LogAlreadyOnVersionRequested(maxDatabasedMigrationVersion);
+        LogAlreadyOnVersionRequested(maxDatabasedMigrationVersion, "upgrade");
         return Result.Success;
       } else if (validationContext.MaxFileMigrationVersion < toVersion) {
         LogVersionRequestedDoesNotExist(toVersion, validationContext.MaxFileMigrationVersion);
