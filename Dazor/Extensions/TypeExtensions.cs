@@ -3,24 +3,24 @@ using System.Collections.Generic;
 
 namespace Dazor.Extensions {
   internal static class TypeExtensions {
-		private static readonly IDictionary<Type, string> TypeToFriendlyName = new Dictionary<Type, string> {
-				{ typeof(string), "string" },
-				{ typeof(object), "object" },
-				{ typeof(bool), "bool" },
-				{ typeof(byte), "byte" },
-				{ typeof(char), "char" },
-				{ typeof(decimal), "decimal" },
-				{ typeof(double), "double" },
-				{ typeof(short), "short" },
-				{ typeof(int), "int" },
-				{ typeof(long), "long" },
-				{ typeof(sbyte), "sbyte" },
-				{ typeof(float), "float" },
-				{ typeof(ushort), "ushort" },
-				{ typeof(uint), "uint" },
-				{ typeof(ulong), "ulong" },
-				{ typeof(void), "void" }
-		};
+    private static readonly IDictionary<Type, string> TypeToFriendlyName = new Dictionary<Type, string> {
+        { typeof(string), "string" },
+        { typeof(object), "object" },
+        { typeof(bool), "bool" },
+        { typeof(byte), "byte" },
+        { typeof(char), "char" },
+        { typeof(decimal), "decimal" },
+        { typeof(double), "double" },
+        { typeof(short), "short" },
+        { typeof(int), "int" },
+        { typeof(long), "long" },
+        { typeof(sbyte), "sbyte" },
+        { typeof(float), "float" },
+        { typeof(ushort), "ushort" },
+        { typeof(uint), "uint" },
+        { typeof(ulong), "ulong" },
+        { typeof(void), "void" }
+    };
     public static string GetFriendlyName(this Type type) {
       if (TypeToFriendlyName.TryGetValue(type, out var name)) return name;
       // GetElementType() will not return null if it's an array or pointer type.

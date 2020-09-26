@@ -161,14 +161,18 @@ namespace Dazor.Cli.Commands {
       Console.ForegroundColor = foregroundColor;
     }
 
-    protected static void LogOnVersionBeforeRequested(short toVersion, short maxDatabasedMigrationVersion) {
+    protected static void LogOnVersionBeforeRequested(short toVersion, short maxDatabasedMigrationVersion, string commandName) {
       var foregroundColor = Console.ForegroundColor;
       Console.ForegroundColor = ConsoleColor.Red;
       Console.Error.Write("Already at version ");
       Console.ForegroundColor = ConsoleColor.Yellow;
       Console.Error.Write(maxDatabasedMigrationVersion);
       Console.ForegroundColor = ConsoleColor.Red;
-      Console.Error.Write("; can't downgrade to ");
+      Console.Error.Write("; can't ");
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      Console.Error.Write(commandName);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write(" to ");
       Console.ForegroundColor = ConsoleColor.Yellow;
       Console.Error.Write(toVersion);
       Console.ForegroundColor = ConsoleColor.Red;
@@ -190,6 +194,25 @@ namespace Dazor.Cli.Commands {
       Console.Error.Write(" to ");
       Console.ForegroundColor = ConsoleColor.Yellow;
       Console.Error.Write(toVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.WriteLine(".");
+      Console.ForegroundColor = foregroundColor;
+    }
+
+    protected static void LogCanOnlyDowngradeTo(short toVersion, short canOnlyBeAtVersion, string commandName) {
+      var foregroundColor = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("Cannot ");
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      Console.Error.Write(commandName);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write($" to version ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(toVersion);
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.Error.Write("; undo versions present only allow going to version ");
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      Console.Error.Write(canOnlyBeAtVersion);
       Console.ForegroundColor = ConsoleColor.Red;
       Console.Error.WriteLine(".");
       Console.ForegroundColor = foregroundColor;

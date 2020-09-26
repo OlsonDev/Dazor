@@ -1,7 +1,9 @@
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dazor.Cli.Options;
 using Dazor.Config;
+using Dazor.Extensions;
 using Microsoft.Data.SqlClient;
 
 namespace Dazor.Cli.Commands {
@@ -17,7 +19,7 @@ namespace Dazor.Cli.Commands {
       if (validationContext.ShouldReportFailure) return Result.Failure;
       var maxDatabasedMigrationVersion = validationContext.MaxDatabasedMigrationVersion;
       var toVersionRaw = ParseToVersionFromWhat(maxDatabasedMigrationVersion);
-      if (UndoToVersionIsImpossible(toVersionRaw, maxDatabasedMigrationVersion)) {
+      if (UndoToVersionIsImpossible(toVersionRaw, validationContext)) {
         return Result.Failure;
       }
 
@@ -26,18 +28,19 @@ namespace Dazor.Cli.Commands {
       return Result.Success;
     }
 
-    private Task UndoAsync(int value) {
+    private Task UndoAsync(int toVersion) {
       throw new System.NotImplementedException();
     }
 
-    private bool UndoToVersionIsImpossible(short? toVersionRaw, short maxDatabasedMigrationVersion) {
+    private bool UndoToVersionIsImpossible(short? toVersionRaw,  ValidationContext validationContext) {
       if (toVersionRaw is null) {
         LogWhatNotParsed("undo", _options.What);
         return true;
       }
+      var maxDatabasedMigrationVersion = validationContext.MaxDatabasedMigrationVersion;
       var toVersion = toVersionRaw.Value;
       if (toVersion > maxDatabasedMigrationVersion) {
-        LogOnVersionBeforeRequested(toVersion, maxDatabasedMigrationVersion);
+        LogOnVersionBeforeRequested(toVersion, maxDatabasedMigrationVersion, "undo");
         return true;
       } else if (toVersion == maxDatabasedMigrationVersion) {
         LogAlreadyOnVersionRequested(maxDatabasedMigrationVersion, "undo");
@@ -46,7 +49,19 @@ namespace Dazor.Cli.Commands {
         LogCantDowngradeToZeroOrLess(toVersion, "undo");
       }
 
-      // TODO: Make sure there are undo versions for each step...
+      var undoMigrations = validationContext.MigrationFiles
+        .Where(mf => mf.MigrationType == MigrationType.UndoVersion && mf.Version!.Value.IsInRangeInclusive((short)(toVersion + 1), maxDatabasedMigrationVersion))
+        .OrderByDescending(mf => mf.Version!.Value);
+
+      var canBeAtVersion = maxDatabasedMigrationVersion;
+      foreach (var undoMigration in undoMigrations) {
+        if (canBeAtVersion != undoMigration.Version!.Value) break;
+        canBeAtVersion--;
+      }
+      if (canBeAtVersion != toVersion) {
+        LogCanOnlyDowngradeTo(toVersion, canBeAtVersion, "undo");
+        return true;
+      }
 
       return false;
     }
